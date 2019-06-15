@@ -1,0 +1,2 @@
+kubectl apply -f dashboard.yaml
+kubectl config set-credentials kubernetes-admin --token=$(kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep kubernetes-admin | awk '{print $1}') | grep ^token: | awk '{print $2}')
