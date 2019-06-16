@@ -9,8 +9,8 @@ kubectl create configmap datadogtoken --from-literal="event.tokenKey"="0"
 
 kubectl create secret generic dd --from-env-file=secrets.txt
 
-kubectl apply -f datadog-agent.yaml
-
 # https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics
 # https://docs.datadoghq.com/agent/kubernetes/host_setup/
 kubectl apply -f kube-state-metrics
+
+kubectl apply -f datadog-agent.yaml
