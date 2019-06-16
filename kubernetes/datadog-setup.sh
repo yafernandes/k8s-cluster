@@ -7,6 +7,8 @@ kubectl apply -f "https://raw.githubusercontent.com/DataDog/datadog-agent/master
 # https://docs.datadoghq.com/agent/kubernetes/event_collection/
 kubectl create configmap datadogtoken --from-literal="event.tokenKey"="0"
 
+kubectl create secret generic dd --from-env-file=secrets.txt
+
 kubectl apply -f datadog-agent.yaml
 
 # https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics

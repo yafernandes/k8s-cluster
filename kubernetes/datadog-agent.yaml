@@ -25,7 +25,10 @@ spec:
             protocol: TCP
         env:
           - name: DD_API_KEY
-            value: 76c69d97762275fa93bf38c7f16e49a3
+            valueFrom:
+              secretKeyRef:
+                name: dd
+                key: api
           - name: DD_SITE
             # Set DD_SITE to datadoghq.eu to send your Agent data to the Datadog EU site 
             value: "datadoghq.com"
