@@ -13,4 +13,4 @@ kubectl apply -f datadog-agent.yaml
 
 # https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics
 # https://docs.datadoghq.com/agent/kubernetes/host_setup/
-# kubectl apply -f kube-state-metrics/kubernetes
+kubectl apply -f kube-state-metrics

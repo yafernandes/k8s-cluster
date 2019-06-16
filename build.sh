@@ -9,5 +9,4 @@ ansible-playbook -i inventory.txt kubernetes.yaml
 
 cd ${LOC}/kubernetes
 ./dashboard-setup.sh
-kubectl apply -f kube-state-metrics
 ./datadog-setup.sh
