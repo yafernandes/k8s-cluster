@@ -1,0 +1,15 @@
+- name: upgrade all packages
+  become: yes
+  yum:
+    name: '*'
+    state: latest
+- name: Set /etc/hostname
+  become: yes
+  lineinfile:
+    regex: ".*"
+    dest: /etc/hostname
+    line: "{{ansible_host}}"
+- name: Set hostname
+  become: yes
+  hostname:
+    name: "{{ansible_host}}"

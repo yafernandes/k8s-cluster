@@ -1,0 +1,82 @@
+# Docker prereqs
+- name: Install required packages
+  become: yes
+  yum:
+    name:
+      - device-mapper-persistent-data
+      - lvm2
+    state: present
+- name: Deletes daemon.json
+  become: yes
+  file:
+    path: /etc/docker/daemon.json
+    state: absent
+- name: Writes daemon.json
+  become: yes
+  blockinfile:
+    path: /etc/docker/daemon.json
+    create: yes
+    marker: ""
+    block: |
+      {
+          "exec-opts": [
+              "native.cgroupdriver=systemd"
+          ],
+          "log-driver": "json-file",
+          "log-opts": {
+              "max-size": "100m"
+          },
+          "storage-driver": "overlay2",
+          "storage-opts": [
+              "overlay2.override_kernel_check=true"
+          ]
+      }
+
+- name: Add Kubernetes repo
+  become: yes
+  yum_repository:
+    name: kubernetes
+    description: kubernetes
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    gpgkey:
+      - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+      - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    exclude: kube*
+- name: Turn off SELinux
+  become: yes
+  selinux:
+    state: disabled
+- name: Install Kubernetes packages
+  become: yes
+  yum:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    disable_excludes: kubernetes
+- name: Start Kubernetes
+  become: yes
+  systemd:
+    name: kubelet
+    state: started
+    enabled: yes
+- name: Set sysctl for ipv4
+  become: yes
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    state: present
+- name: Set sysctl for ipv6
+  become: yes
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: 1
+    state: present
+- name: Load module br_netfilter
+  become: yes
+  modprobe:
+    name: br_netfilter
+    state: present

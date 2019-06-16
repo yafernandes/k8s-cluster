@@ -1,0 +1,3 @@
+- name: Run Kubeadm
+  become: yes
+  shell: "{{ hostvars['master'].join_cmd }}"

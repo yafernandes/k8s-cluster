@@ -1,0 +1,39 @@
+- name: Run Kubeadm
+  become: yes
+  shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_host}},master.k8s.aws.pipsquack.ca
+  args:
+    creates: /etc/kubernetes/admin.conf
+- name: Udpate config file server
+  become: yes
+  lineinfile:
+    path: /etc/kubernetes/admin.conf
+    regexp: '^( *)server: (https?://).*(:\d+)'
+    backrefs: yes
+    line: '\1server: \2{{ansible_host}}\3'
+- name: Creates directory
+  file:
+    path: "{{ansible_facts.env.HOME}}/.kube"
+    state: directory
+- name: Copy kubeconfig to master .kube
+  become: yes
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ansible_facts.env.HOME}}/.kube/config"
+    remote_src: yes
+    owner: "{{ansible_user}}"
+- name: Copy kubeconfig to ansible host .kube
+  become: yes
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: ~/.kube/config
+    flat: yes
+- name: Install Calico - RBAC
+  shell: kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+- name: Install Calico - Deployment
+  shell: kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
+- name: Get Kubernets join cluster command
+  shell: kubeadm token create --print-join-command
+  register: join_cmd
+- name: Export join command
+  set_fact:
+    join_cmd: "{{ join_cmd.stdout }}"

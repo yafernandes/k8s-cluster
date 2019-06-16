@@ -1,0 +1,38 @@
+- name: Wait for machines to start
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Wait for machines to start
+      wait_for_connection:
+
+- hosts: all
+  roles:
+    - centos
+    - docker
+    - k8s-base
+
+- hosts: master
+  roles:
+    - k8s-master
+
+- hosts: workers
+  roles:
+    - k8s-worker
+
+- name: Open Read Only port
+  hosts: all
+  tasks:
+    - name: Udpate config file server
+      become: yes
+      lineinfile:
+        path: /etc/sysconfig/kubelet
+        regexp: '^(KUBELET_EXTRA_ARGS=.*)'
+        backrefs: yes
+        line: '\1 --read-only-port=10255'
+    - name: Restart Kubelets
+      become: yes
+      systemd:
+        name: kubelet
+        state: restarted
+        enabled: yes
+        daemon_reload: yes
