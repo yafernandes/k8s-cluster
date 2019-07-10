@@ -31,7 +31,6 @@ resource "aws_instance" "master" {
 }
 
 resource "aws_instance" "worker" {
-  count           = 1
   ami             = "${data.aws_ami.centos7.id}"
   instance_type   = "t2.xlarge"
   subnet_id       = "${aws_subnet.main.id}"
