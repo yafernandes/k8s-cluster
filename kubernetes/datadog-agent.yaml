@@ -28,7 +28,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: dd
-                key: api
+                key: dd_api_key
           - name: DD_SITE
             # Set DD_SITE to datadoghq.eu to send your Agent data to the Datadog EU site 
             value: "datadoghq.com"

@@ -16,12 +16,22 @@ spec:
     spec:
       serviceAccountName: dca
       containers:
-        - image: datadog/cluster-agent:latest
+        - image: datadog/cluster-agent
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
           imagePullPolicy: Always
           name: datadog-cluster-agent
           env:
             - name: DD_API_KEY
-              value: '<YOUR_API_KEY>'
+              valueFrom:
+                secretKeyRef:
+                  name: dd
+                  key: dd_api_key
             - name: DD_COLLECT_KUBERNETES_EVENTS
               value: "true"
             - name: DD_LEADER_ELECTION
