@@ -9,7 +9,6 @@ resource "aws_key_pair" "main" {
 }
 
 resource "aws_instance" "master" {
-  count           = 1
   ami             = "${data.aws_ami.centos7.id}"
   instance_type   = "t2.xlarge"
   subnet_id       = "${aws_subnet.main.id}"
@@ -20,12 +19,12 @@ resource "aws_instance" "master" {
     volume_size = 13
   }
 
-  tags {
+  tags = {
     Name    = "${var.name} Master"
     Creator = "alex.fernandes"
   }
 
-  volume_tags {
+  volume_tags = {
     Name    = "${var.name} Master"
     Creator = "alex.fernandes"
   }
@@ -43,12 +42,12 @@ resource "aws_instance" "worker" {
     volume_size = 13
   }
 
-  tags {
+  tags = {
     Name    = "${var.name} Worker ${format("%02v", count.index)}"
     Creator = "alex.fernandes"
   }
 
-  volume_tags {
+  volume_tags = {
     Name    = "${var.name} Worker ${format("%02v", count.index)}"
     Creator = "alex.fernandes"
   }

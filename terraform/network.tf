@@ -3,7 +3,7 @@ data "http" "myip" {
 }
 
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = "true"
 
   tags = {
@@ -41,19 +41,19 @@ resource "aws_security_group" "main" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name    = "${var.name}"
     Creator = "alex.fernandes"
   }
 }
 
 resource "aws_security_group_rule" "self_ref" {
-    security_group_id = "${aws_security_group.main.id}"
-    type = "ingress"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    source_security_group_id = "${aws_security_group.main.id}"
+  security_group_id        = "${aws_security_group.main.id}"
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  source_security_group_id = "${aws_security_group.main.id}"
 }
 
 resource "aws_internet_gateway" "main" {

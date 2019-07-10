@@ -11,10 +11,10 @@ resource "aws_route53_record" "master" {
 }
 
 resource "aws_route53_record" "worker" {
-  count   = "${aws_instance.worker.count}"
+  count   = "${length(aws_instance.worker)}"
   zone_id = "${data.aws_route53_zone.pipsquack.zone_id}"
   name    = "worker${format("%02v", count.index)}.k8s"
   type    = "CNAME"
   ttl     = "60"
-  records = ["${element(aws_instance.worker.*.public_dns, count.index)}"]
+  records = ["${aws_instance.worker[count.index].public_dns}"]
 }
