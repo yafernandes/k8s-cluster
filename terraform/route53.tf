@@ -18,3 +18,7 @@ resource "aws_route53_record" "worker" {
   ttl     = "60"
   records = ["${aws_instance.worker[count.index].public_dns}"]
 }
+
+output "workers" {
+  value = "${aws_route53_record.worker[*].fqdn}"
+}
