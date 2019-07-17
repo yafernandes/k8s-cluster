@@ -38,3 +38,5 @@ override.tf.json
 # example: *tfplan*
 
 # End of https://www.gitignore.io/api/ansible,terraform
+
+ansible/inventory.txt
