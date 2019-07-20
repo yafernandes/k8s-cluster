@@ -1,6 +1,0 @@
-master ansible_host=master.k8s.aws.pipsquack.ca ansible_connection=ssh ansible_user=centos ansible_ssh_private_key_file=/Users/alex.fernandes/.ssh/alexf-key.pem
-
-worker_00 ansible_host=worker00.k8s.aws.pipsquack.ca ansible_connection=ssh ansible_user=centos ansible_ssh_private_key_file=/Users/alex.fernandes/.ssh/alexf-key.pem
-
-[workers]
-worker_00
