@@ -1,4 +1,4 @@
-- name: remove old docker
+- name: Remove old docker
   become: yes
   yum:
     name:
