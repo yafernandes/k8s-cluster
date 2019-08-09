@@ -1,0 +1,7 @@
+cluster_check: true
+init_config:
+
+instances:
+  - prometheus_url: "https://metrics-server.kube-system/metrics"
+    bearer_token_auth: true
+    ssl_verify: false

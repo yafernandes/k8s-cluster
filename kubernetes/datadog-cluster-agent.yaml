@@ -172,6 +172,8 @@ spec:
               memory: "256Mi"
               cpu: "200m"
           env:
+            - name: REDEPLOY
+              value: "foo"
             - name: DD_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -198,9 +200,23 @@ spec:
               value: "kube_services"
           volumeMounts:
             - name: dd-conf
+              mountPath: /conf.d/coredns.d/conf.yaml
+              subPath: coredns.yaml
+            - name: dd-conf
               mountPath: /conf.d/istio.d/conf.yaml
               subPath: istio.yaml
-
+            - name: dd-conf
+              mountPath: /conf.d/kube_apiserver_metrics.d/conf.yaml
+              subPath: kube_apiserver_metrics.yaml
+            - name: dd-conf
+              mountPath: /conf.d/kube_controller_manager.d/conf.yaml
+              subPath: kube_controller_manager.yaml
+            - name: dd-conf
+              mountPath: /conf.d/kube_metrics_server.d/conf.yaml
+              subPath: kube_metrics_server.yaml
+            - name: dd-conf
+              mountPath: /conf.d/kube_scheduler.d/conf.yaml
+              subPath: kube_scheduler.yaml
       volumes:
         - name: dd-conf
           configMap:

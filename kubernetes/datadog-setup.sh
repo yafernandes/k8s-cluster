@@ -10,12 +10,15 @@ kubectl apply -f https://github.com/DataDog/datadog-agent/raw/master/Dockerfiles
 # https://docs.datadoghq.com/agent/kubernetes/event_collection/
 kubectl create configmap datadogtoken --from-literal="event.tokenKey"="0"
 
-kubectl create configmap dd-conf  --from-file istio.yaml
+kubectl create configmap dd-conf  --from-file dd-conf
+
+kubectl create configmap dd-conf  --from-file kube_scheduler.yaml
 
 kubectl create secret generic dd --from-env-file=secrets.txt
 
 # https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics
 # https://docs.datadoghq.com/agent/kubernetes/host_setup/
-kubectl apply -f kube-state-metrics
+kubectl apply -f kube-state-metrics/kubernetes
+kubectl apply -f metrics-server/deploy/1.8+
 
 kubectl apply -f datadog-cluster-agent.yaml
