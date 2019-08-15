@@ -9,7 +9,7 @@ resource "aws_key_pair" "main" {
 }
 
 resource "aws_instance" "master" {
-  ami             = "${data.aws_ami.centos7.id}"
+  ami             = "${data.aws_ami.debian9.id}"
   instance_type   = "t2.xlarge"
   subnet_id       = "${aws_subnet.main.id}"
   security_groups = ["${aws_security_group.main.id}"]
@@ -32,7 +32,7 @@ resource "aws_instance" "master" {
 
 resource "aws_instance" "worker" {
   count           = "${var.workers_count}"
-  ami             = "${data.aws_ami.centos7.id}"
+  ami             = "${data.aws_ami.debian9.id}"
   instance_type   = "t2.xlarge"
   subnet_id       = "${aws_subnet.main.id}"
   security_groups = ["${aws_security_group.main.id}"]
