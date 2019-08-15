@@ -7,7 +7,7 @@
 
 - hosts: all
   roles:
-    - centos
+    - linux
     - docker
     - k8s-base
 
@@ -23,12 +23,21 @@
   hosts: all
   tasks:
     - name: Udpate config file server
+      when: ansible_facts['os_family'] == "RedHat"
       become: yes
       lineinfile:
         path: /etc/sysconfig/kubelet
         regexp: '^(KUBELET_EXTRA_ARGS=.*)'
         backrefs: yes
         line: '\1 --read-only-port=10255'
+    - name: Udpate config file server
+      when: ansible_facts['os_family'] == "Debian"
+      become: yes
+      lineinfile:
+        path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        regexp: '^(Environment="KUBELET_CONFIG_ARGS=.*)(")'
+        backrefs: yes
+        line: '\1 --read-only-port=10255\2'
     - name: Restart Kubelets
       become: yes
       systemd:
