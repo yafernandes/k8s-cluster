@@ -12,8 +12,6 @@ kubectl create configmap datadogtoken --from-literal="event.tokenKey"="0"
 
 kubectl create configmap dd-conf  --from-file dd-conf
 
-kubectl create configmap dd-conf  --from-file kube_scheduler.yaml
-
 kubectl create secret generic dd --from-env-file=secrets.txt
 
 # https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics

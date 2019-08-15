@@ -1,6 +1,6 @@
 - name: upgrade all packages
   become: yes
-  yum:
+  package:
     name: '*'
     state: latest
 - name: Set /etc/hostname
