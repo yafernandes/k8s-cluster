@@ -123,26 +123,26 @@ spec:
         - name: debugfs
           hostPath:
             path: /sys/kernel/debug
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: datadog-agent
-  name: datadog-agent
-spec:
-  clusterIP: None
-  ports:
-  - name: dogstatsdport
-    port: 8125
-    protocol: UDP
-    targetPort: 8125
-  - name: traceport
-    port: 8126
-    protocol: TCP
-    targetPort: 8126
-  selector:
-    app: datadog-agent
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app: datadog-agent
+#   name: datadog-agent
+# spec:
+#   clusterIP: None
+#   ports:
+#   - name: dogstatsdport
+#     port: 8125
+#     protocol: UDP
+#     targetPort: 8125
+#   - name: traceport
+#     port: 8126
+#     protocol: TCP
+#     targetPort: 8126
+#   selector:
+#     app: datadog-agent
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
