@@ -14,8 +14,11 @@ spec:
       serviceAccountName: datadog-agent
       containers:
       - name: datadog-agent
-        image: datadog/agent:latest-jmx
+        image: datadog/agent:latest
         imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add: ["SYS_ADMIN", "SYS_RESOURCE", "SYS_PTRACE", "NET_ADMIN"]
         ports:
           - containerPort: 8125
             hostPort: 8125
@@ -74,6 +77,10 @@ spec:
           # https://github.com/DataDog/integrations-core/issues/2582
           - name:  DD_KUBELET_TLS_VERIFY
             value: "true"
+          - name: DD_SYSTEM_PROBE_ENABLED
+            value: "true"
+          - name: DD_SYSPROBE_SOCKET
+            value: "/var/run/s6/sysprobe.sock"
         resources:
           requests:
             memory: "256Mi"
@@ -92,6 +99,8 @@ spec:
             readOnly: true
           - name: pointerdir
             mountPath: /opt/datadog-agent/run
+          - name: debugfs
+            mountPath: /sys/kernel/debug
         livenessProbe:
           exec:
             command:
@@ -111,6 +120,9 @@ spec:
         - name: pointerdir
           hostPath:
             path: /opt/datadog-agent/run
+        - name: debugfs
+          hostPath:
+            path: /sys/kernel/debug
 ---
 apiVersion: v1
 kind: Service
@@ -203,8 +215,11 @@ spec:
               mountPath: /conf.d/coredns.d/conf.yaml
               subPath: coredns.yaml
             - name: dd-conf
-              mountPath: /conf.d/istio.d/conf.yaml
-              subPath: istio.yaml
+              mountPath: /conf.d/etcd.d/conf.yaml
+              subPath: etcd.yaml
+            # - name: dd-conf
+            #   mountPath: /conf.d/istio.d/conf.yaml
+            #   subPath: istio.yaml
             - name: dd-conf
               mountPath: /conf.d/kube_apiserver_metrics.d/conf.yaml
               subPath: kube_apiserver_metrics.yaml
