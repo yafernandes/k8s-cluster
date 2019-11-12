@@ -105,8 +105,8 @@
   become: yes
   apt:
     name:
-      - kubelet
-      - kubeadm
-      - kubectl
+      - kubelet=1.15.5-00
+      - kubeadm=1.15.5-00
+      - kubectl=1.15.5-00
     state: present
     update_cache: yes
