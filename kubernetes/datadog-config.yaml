@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dd-agent-confd
+data:
+  etcd.yaml: |-
+    ad_identifiers:
+      - etcd
+    init_config:
+    instances:
+      - use_preview: true
+        prometheus_url: https://%%host%%:2379/metrics
+        ssl_ca_cert: /etc/kubernetes/pki/etcd/ca.crt
+        ssl_cert: /etc/kubernetes/pki/etcd/peer.crt
+        ssl_private_key: /etc/kubernetes/pki/etcd/peer.key
+  kube_controller_manager.yaml: |-
+    ad_identifiers:
+      - kube-controller-manager
+    init_config:
+    instances:
+    - prometheus_url: http://%%host%%:10252/metrics
+  kube_scheduler.yaml: |-
+    ad_identifiers:
+      - kube-scheduler
+    init_config:
+    instances:
+      - prometheus_url: http://%%host%%:10251/metrics
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dd-cluster-agent-confd
+data:
+  # istio.yaml: |-
+  #   cluster_check: true
+  #   init_config:
+  #   instances:
+  #     - istio_mesh_endpoint: "http://istio-telemetry.istio-system:42422/metrics"
+  #       mixer_endpoint: "http://istio-telemetry.istio-system:15014/metrics"
+  #       galley_endpoint: "http://istio-galley.istio-system:15014/metrics"
+  #       pilot_endpoint: "http://istio-pilot.istio-system:15014/metrics"
+  #       citadel_endpoint: "http://istio-citadel.istio-system:15014/metrics"
+  #       send_histograms_buckets: true
+  http_check.yaml: |-
+    cluster_check: true
+    init_config:
+    instances:
+      - name: Datadog website
+        url: https://www.datadoghq.com/
