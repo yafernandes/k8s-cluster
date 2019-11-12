@@ -27,10 +27,12 @@
     src: /etc/kubernetes/admin.conf
     dest: ~/.kube/config
     flat: yes
-- name: Install Calico - RBAC
-  shell: kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
-- name: Install Calico - Deployment
-  shell: kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
+# - name: Install Calico - RBAC
+#   shell: kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+# - name: Install Calico - Deployment
+#   shell: kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
+- name: Install Calico
+  shell: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
 - name: Get Kubernets join cluster command
   shell: kubeadm token create --print-join-command
   register: join_cmd
