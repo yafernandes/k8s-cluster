@@ -1,21 +1,81 @@
-apiVersion: extensions/v1beta1
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dd-agent-confd
+data:
+  etcd.yaml: |-
+    ad_identifiers:
+      - etcd
+    init_config:
+    instances:
+      - use_preview: true
+        prometheus_url: https://%%host%%:2379/metrics
+        ssl_ca_cert: /etc/kubernetes/pki/etcd/ca.crt
+        ssl_cert: /etc/kubernetes/pki/etcd/peer.crt
+        ssl_private_key: /etc/kubernetes/pki/etcd/peer.key
+  kube_controller_manager.yaml: |-
+    ad_identifiers:
+      - kube-controller-manager
+    init_config:
+    instances:
+    - prometheus_url: http://%%host%%:10252/metrics
+  kube_scheduler.yaml: |-
+    ad_identifiers:
+      - kube-scheduler
+    init_config:
+    instances:
+      - prometheus_url: http://%%host%%:10251/metrics
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dd-cluster-agent-confd
+data:
+  # istio.yaml: |-
+  #   cluster_check: true
+  #   init_config:
+  #   instances:
+  #     - istio_mesh_endpoint: "http://istio-telemetry.istio-system:42422/metrics"
+  #       mixer_endpoint: "http://istio-telemetry.istio-system:15014/metrics"
+  #       galley_endpoint: "http://istio-galley.istio-system:15014/metrics"
+  #       pilot_endpoint: "http://istio-pilot.istio-system:15014/metrics"
+  #       citadel_endpoint: "http://istio-citadel.istio-system:15014/metrics"
+  #       send_histograms_buckets: true
+  http_check.yaml: |-
+    cluster_check: true
+    init_config:
+    instances:
+      - name: Datadog website
+        url: https://www.datadoghq.com/
+---
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: datadog-agent
 spec:
+  selector:
+    matchLabels:
+      name: datadog-agent
   template:
     metadata:
+      name: datadog-agent
       labels:
-        app: datadog-agent
+        name: datadog-agent
       annotations:
         sidecar.istio.io/inject: "false"
-      name: datadog-agent
     spec:
       serviceAccountName: datadog-agent
       containers:
       - name: datadog-agent
         image: datadog/agent:latest
         imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "256m"
         securityContext:
           capabilities:
             add: ["SYS_ADMIN", "SYS_RESOURCE", "SYS_PTRACE", "NET_ADMIN"]
@@ -29,18 +89,16 @@ spec:
             name: traceport
             protocol: TCP
         env:
-          - name: REDEPLOY
-            value: "foo"
           - name: DD_API_KEY
             valueFrom:
               secretKeyRef:
                 name: dd
-                key: dd_api_key
+                key: api-key
           - name: DD_CLUSTER_AGENT_AUTH_TOKEN
             valueFrom:
               secretKeyRef:
                 name: dd
-                key: auth_token
+                key: token
           - name: KUBERNETES
             value: "true"
           - name: DD_CLUSTER_AGENT_ENABLED
@@ -48,7 +106,6 @@ spec:
           - name: DD_EXTRA_CONFIG_PROVIDERS
             value: "clusterchecks"
           - name: DD_SITE
-            # Set DD_SITE to datadoghq.eu to send your Agent data to the Datadog EU site 
             value: "datadoghq.com"
           # https://docs.datadoghq.com/agent/kubernetes/legacy/#pagetitle
           - name: DD_KUBERNETES_KUBELET_HOST
@@ -66,6 +123,8 @@ spec:
                 fieldPath: status.hostIP
           - name: DD_APM_ENABLED
             value: "true"
+          - name: DD_PROCESS_AGENT_ENABLED
+            value: "true"
           - name: DD_APM_NON_LOCAL_TRAFFIC
             value: "true"
           - name: DD_DOGSTATSD_NON_LOCAL_TRAFFIC
@@ -74,6 +133,8 @@ spec:
             value: "true"
           - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
             value: "true"
+          - name: DD_LOGS_CONFIG_K8S_CONTAINER_USE_FILE
+            value: "true"
           # https://github.com/DataDog/integrations-core/issues/2582
           - name:  DD_KUBELET_TLS_VERIFY
             value: "true"
@@ -81,16 +142,27 @@ spec:
             value: "true"
           - name: DD_SYSPROBE_SOCKET
             value: "/var/run/s6/sysprobe.sock"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "256Mi"
-            cpu: "256m"
+          - name: DD_KUBERNETES_NODE_LABELS_AS_TAGS
+            value: |-
+              {
+                "cni.projectcalico.org/podIP": "podIP"
+
+              }
+          - name: DD_KUBERNETES_POD_LABELS_AS_TAGS
+            value: |-
+              {
+                "ca.pipsquack/subdomain": "where"
+
+              }
+          - name: DD_TAGS
+            value: "yafernandes/k8s-cluster creator:alex.fernandes"
         volumeMounts:
           - name: dockersocket
             mountPath: /var/run/docker.sock
+          - name: logpodpath
+            mountPath: /var/log/pods
+          - name: logcontainerpath
+            mountPath: /var/lib/docker/containers
           - name: procdir
             mountPath: /host/proc
             readOnly: true
@@ -101,16 +173,32 @@ spec:
             mountPath: /opt/datadog-agent/run
           - name: debugfs
             mountPath: /sys/kernel/debug
+          - name: dd-confd
+            mountPath: /conf.d
+          - mountPath: /etc/kubernetes/pki/etcd
+            name: etcd-certs
+          - mountPath: /etc/datadog-agent/conf.d/etcd.d
+            name: empty-dir
         livenessProbe:
           exec:
             command:
-            - ./probe.sh
+              - ./probe.sh
           initialDelaySeconds: 15
           periodSeconds: 5
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: "Exists"
+          effect: NoSchedule
       volumes:
         - name: dockersocket
           hostPath:
             path: /var/run/docker.sock
+        - hostPath:
+            path: /var/log/pods
+          name: logpodpath
+        - hostPath:
+            path: /var/lib/docker/containers
+          name: logcontainerpath
         - name: procdir
           hostPath:
             path: /proc
@@ -123,53 +211,31 @@ spec:
         - name: debugfs
           hostPath:
             path: /sys/kernel/debug
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   labels:
-#     app: datadog-agent
-#   name: datadog-agent
-# spec:
-#   clusterIP: None
-#   ports:
-#   - name: dogstatsdport
-#     port: 8125
-#     protocol: UDP
-#     targetPort: 8125
-#   - name: traceport
-#     port: 8126
-#     protocol: TCP
-#     targetPort: 8126
-#   selector:
-#     app: datadog-agent
+        - name: dd-confd
+          configMap:
+            name: dd-agent-confd
+        - name: etcd-certs
+          hostPath:
+            path: /etc/kubernetes/pki/etcd
+            type: DirectoryOrCreate
+        - name: empty-dir
+          emptyDir: {}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: datadog-cluster-agent
-  namespace: default
 spec:
+  selector:
+    matchLabels:
+      name: datadog-cluster-agent
   template:
     metadata:
+      name: datadog-cluster-agent
       labels:
-        app: datadog-cluster-agent
-      name: datadog-agent
-      # annotations:
-      #   sidecar.istio.io/inject: "false"
-      #   ad.datadoghq.com/service.check_names: '["istio"]'
-      #   ad.datadoghq.com/service.init_configs: '[{}]'
-      #   ad.datadoghq.com/service.instances: |
-      #     [
-      #       {
-      #         "istio_mesh_endpoint": "http://istio-telemetry.istio-system:42422/metrics",
-      #         "mixer_endpoint": "http://istio-telemetry.istio-system:15014/metrics",
-      #         "galley_endpoint": "http://istio-galley.istio-system:15014/metrics",
-      #         "pilot_endpoint": "http://istio-pilot.istio-system:15014/metrics",
-      #         "citadel_endpoint": "http://istio-citadel.istio-system:15014/metrics",
-      #         "send_histograms_buckets": true
-      #       }
-      #     ]
+        name: datadog-cluster-agent
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: dca
       containers:
@@ -190,16 +256,16 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: dd
-                  key: dd_api_key
+                  key: api-key
             - name: DD_CLUSTER_AGENT_AUTH_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: dd
-                  key: auth_token
+                  key: token
             - name: DD_CLUSTER_CHECKS_ENABLED
               value: "true"
             - name: DD_CLUSTER_NAME
-              value: "alexf-k8s"
+              value: "poseidon"
             - name: DD_COLLECT_KUBERNETES_EVENTS
               value: "true"
             - name: DD_LEADER_ELECTION
@@ -211,42 +277,22 @@ spec:
             - name: DD_EXTRA_LISTENERS
               value: "kube_services"
           volumeMounts:
-            - name: dd-conf
-              mountPath: /conf.d/coredns.d/conf.yaml
-              subPath: coredns.yaml
-            - name: dd-conf
-              mountPath: /conf.d/etcd.d/conf.yaml
-              subPath: etcd.yaml
-            # - name: dd-conf
-            #   mountPath: /conf.d/istio.d/conf.yaml
-            #   subPath: istio.yaml
-            - name: dd-conf
-              mountPath: /conf.d/kube_apiserver_metrics.d/conf.yaml
-              subPath: kube_apiserver_metrics.yaml
-            - name: dd-conf
-              mountPath: /conf.d/kube_controller_manager.d/conf.yaml
-              subPath: kube_controller_manager.yaml
-            - name: dd-conf
-              mountPath: /conf.d/kube_metrics_server.d/conf.yaml
-              subPath: kube_metrics_server.yaml
-            - name: dd-conf
-              mountPath: /conf.d/kube_scheduler.d/conf.yaml
-              subPath: kube_scheduler.yaml
+            - name: dd-confd
+              mountPath: /conf.d
       volumes:
-        - name: dd-conf
+        - name: dd-confd
           configMap:
-            name: dd-conf
-
+            name: dd-cluster-agent-confd
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: datadog-cluster-agent
   labels:
-    app: datadog-cluster-agent
+    name: datadog-cluster-agent
 spec:
   ports:
   - port: 5005 # Has to be the same as the one exposed in the DCA. Default is 5005.
     protocol: TCP
   selector:
-    app: datadog-cluster-agent
+    name: datadog-cluster-agent
