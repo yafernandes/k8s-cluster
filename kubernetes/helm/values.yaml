@@ -1,0 +1,116 @@
+image:
+  repository: datadog/agent
+  tag: latest
+  pullPolicy: Always
+datadog:
+  apiKeyExistingSecret: dd
+  name: datadog
+  logLevel: INFO
+  useCriSocketVolume: true
+  containerLogsPath: /var/lib/docker/containers
+  resources: {}
+  confd:
+    kube_controller_manager.yaml: |-
+      ad_identifiers:
+        - kube-controller-manager
+      init_config:
+      instances:
+        - prometheus_url: http://%%host%%:10252/metrics
+    kube_scheduler.yaml: |-
+      ad_identifiers:
+        - kube-scheduler
+      init_config:
+      instances:
+        - prometheus_url: http://%%host%%:10251/metrics
+    kube_apiserver_metrics.yaml: |-
+      ad_identifiers:
+        - kube-apiserver
+      init_config:
+      instances:
+        - prometheus_url: "%%host%%:6443/metrics"
+          tags:
+            - "apiserver:%%host%%"
+    etcd.yaml: |-
+      ad_identifiers:
+        - etcd
+      init_config:
+      instances:
+        - use_preview: true
+          prometheus_url: https://%%host%%:2379/metrics
+          ssl_ca_cert: /etc/kubernetes/pki/etcd/ca.crt
+          ssl_cert: /etc/kubernetes/pki/etcd/peer.crt
+          ssl_private_key: /etc/kubernetes/pki/etcd/peer.key
+  volumes:
+    - name: etcd-certs
+      hostPath:
+        path: /etc/kubernetes/pki/etcd
+        type: DirectoryOrCreate
+    - name: empty-dir
+      emptyDir: {}
+  volumeMounts:
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+    - mountPath: /etc/datadog-agent/conf.d/etcd.d
+      name: empty-dir
+systemProbe:
+  enabled: true
+  debugPort: 0
+  enableConntrack: true
+  seccompRoot: /var/lib/kubelet/seccomp
+  bpfDebug: false
+  apparmor: unconfined
+clusterAgent:
+  enabled: true
+  containerName: cluster-agent
+  image:
+    repository: datadog/cluster-agent
+    tag: latest
+    pullPolicy: IfNotPresent
+  tokenExistingSecret: dd
+  replicas: 1
+  metricsProvider:
+    enabled: false
+  clusterChecks:
+    enabled: true
+  resources: {}
+rbac:
+  create: true
+  serviceAccountName: default
+tolerations: []
+kubeStateMetrics:
+  enabled: true
+kube-state-metrics:
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+    name:
+daemonset:
+  enabled: true
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+  containers:
+    agent:
+      resources: {}
+    processAgent:
+      resources: {}
+    traceAgent:
+      resources: {}
+    systemProbe:
+      resources: {}
+deployment:
+  enabled: false
+  replicas: 1
+  affinity: {}
+  tolerations: []
+  service:
+    type: ClusterIP
+    annotations: {}
+clusterchecksDeployment:
+  enabled: false
+  rbac:
+    dedicated: false
+    serviceAccountName: default
+  replicas: 2
+  resources: {}
