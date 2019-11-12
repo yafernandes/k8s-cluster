@@ -18,7 +18,8 @@ kubectl create secret generic dd --from-env-file=secrets.txt
 kubectl apply -f kube-state-metrics/examples/standard
 # kubectl apply -f metrics-server/deploy/1.8+
 
-kubectl apply -f datadog-cluster-agent.yaml
+kubectl apply -f datadog-config.yaml
+kubectl apply -f datadog-agent.yaml
 
 kubectl apply -f stresser.yaml
 
