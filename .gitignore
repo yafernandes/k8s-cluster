@@ -42,3 +42,4 @@ override.tf.json
 ansible/inventory.txt
 kubernetes/kube-state-metrics
 kubernetes/metrics-server
+local
