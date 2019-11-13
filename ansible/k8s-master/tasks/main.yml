@@ -1,6 +1,6 @@
 - name: Run Kubeadm
   become: yes
-  shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_facts.fqdn}},master.k8s.aws.pipsquack.ca,{{ansible_facts.all_ipv4_addresses | join(',')}}
+  shell: kubeadm init --service-cidr=172.16.0.0/12 --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_facts.fqdn}},master.k8s.aws.pipsquack.ca,{{ansible_facts.all_ipv4_addresses | join(',')}}
   args:
     creates: /etc/kubernetes/admin.conf
 - name: Udpate config file server
