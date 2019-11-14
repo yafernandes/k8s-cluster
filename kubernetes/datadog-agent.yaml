@@ -105,7 +105,7 @@ spec:
 
               }
           - name: DD_TAGS
-            value: "yafernandes/k8s-cluster creator:alex.fernandes"
+            value: "yafernandes/k8s-cluster creator:alex.fernandes env:env:k8s-cluster"
         volumeMounts:
           - name: dockersocket
             mountPath: /var/run/docker.sock
