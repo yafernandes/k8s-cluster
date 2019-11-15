@@ -54,7 +54,7 @@ spec:
           - name: DD_CLUSTER_AGENT_ENABLED
             value: "true"
           - name: DD_EXTRA_CONFIG_PROVIDERS
-            value: "clusterchecks"
+            value: "clusterchecks endpointschecks"
           - name: DD_SITE
             value: "datadoghq.com"
           # https://docs.datadoghq.com/agent/kubernetes/legacy/#pagetitle
@@ -200,8 +200,6 @@ spec:
               memory: "256Mi"
               cpu: "200m"
           env:
-            - name: REDEPLOY
-              value: "foo"
             - name: DD_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -223,9 +221,9 @@ spec:
             - name: DD_EXTERNAL_METRICS_PROVIDER_ENABLED
               value: "true"
             - name: DD_EXTRA_CONFIG_PROVIDERS
-              value: "kube_services"
+              value: "kube_endpoints kube_services"
             - name: DD_EXTRA_LISTENERS
-              value: "kube_services"
+              value: "kube_endpoints kube_services"
           volumeMounts:
             - name: dd-confd
               mountPath: /conf.d
