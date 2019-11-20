@@ -16,12 +16,14 @@ data:
   kube_controller_manager.yaml: |-
     ad_identifiers:
       - kube-controller-manager
+      - kube-controller-manager-amd64  # OpenShift
     init_config:
     instances:
     - prometheus_url: http://%%host%%:10252/metrics
   kube_scheduler.yaml: |-
     ad_identifiers:
       - kube-scheduler
+      - kube-scheduler-amd64  # OpenShift
     init_config:
     instances:
       - prometheus_url: http://%%host%%:10251/metrics
