@@ -10,6 +10,7 @@ rules:
       - nodes/spec
       - nodes/proxy # Required to get /pods
       - endpoints # Required by kube_controller_manager and kube_scheduler
+      - nodes/stats
     verbs:
       - get
   - nonResourceURLs:
