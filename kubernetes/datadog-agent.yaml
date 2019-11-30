@@ -28,7 +28,7 @@ spec:
             cpu: "256m"
         securityContext:
           capabilities:
-            add: ["SYS_ADMIN", "SYS_RESOURCE", "SYS_PTRACE", "NET_ADMIN"]
+            add: ["SYS_ADMIN", "SYS_RESOURCE", "SYS_PTRACE", "NET_ADMIN", "IPC_LOCK"]
         ports:
           - containerPort: 8125
             hostPort: 8125
