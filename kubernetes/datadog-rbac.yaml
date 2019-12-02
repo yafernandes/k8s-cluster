@@ -3,20 +3,23 @@ kind: ClusterRole
 metadata:
   name: datadog-agent
 rules:
-  - apiGroups: # This is required by the agent to query the Kubelet API.
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
+  - apiGroups: # Kubelet connectivity
       - ""
     resources:
       - nodes/metrics
       - nodes/spec
-      - nodes/proxy # Required to get /pods
-      - endpoints # Required by kube_controller_manager and kube_scheduler
+      - nodes/proxy
       - nodes/stats
     verbs:
       - get
-  - nonResourceURLs:
-      - "/version"
-      - "/healthz"
-      - "/metrics"
+  - apiGroups: # leader election check
+      - ""
+    resources:
+      - endpoints
     verbs:
       - get
 ---
@@ -57,11 +60,11 @@ rules:
     resources:
       - configmaps
     resourceNames:
-      - datadog-leader-election
+      - datadog-leader-election # Leader election token
     verbs:
       - get
       - update
-  - apiGroups:
+  - apiGroups: # To create the leader election token
       - ""
     resources:
       - configmaps
@@ -95,14 +98,14 @@ metadata:
   name: datadog-collect-events
 rules:
   - apiGroups:
-    - ""
+      - ""
     resources:
-    - configmaps
+      - configmaps
     resourceNames:
-    - datadogtoken
+      - datadogtoken
     verbs:
-    - get
-    - update
+      - get
+      - update
 ---
 kind: ServiceAccount
 apiVersion: v1
