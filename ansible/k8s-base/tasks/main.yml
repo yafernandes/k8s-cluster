@@ -32,7 +32,13 @@
               "overlay2.override_kernel_check=true"
           ]
       }
-
+- name: Restart Docker
+  become: yes
+  systemd:
+    name: docker
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
 - name: Add Kubernetes repo
   when: ansible_facts['os_family'] == "RedHat"
   become: yes
@@ -105,8 +111,8 @@
   become: yes
   apt:
     name:
-      - kubelet=1.15.5-00
-      - kubeadm=1.15.5-00
-      - kubectl=1.15.5-00
+      - kubelet=1.15.6-00
+      - kubeadm=1.15.6-00
+      - kubectl=1.15.6-00
     state: present
     update_cache: yes
