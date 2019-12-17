@@ -1,14 +1,16 @@
 image:
   repository: datadog/agent
   tag: latest
-  pullPolicy: Always
+rbac:
+  create: true
 datadog:
   apiKeyExistingSecret: dd
   name: datadog
-  logLevel: INFO
-  useCriSocketVolume: true
-  containerLogsPath: /var/lib/docker/containers
-  resources: {}
+  logsEnabled: true
+  logsConfigContainerCollectAll: true
+  apmEnabled: true
+  nonLocalTraffic: true
+  processAgentEnabled: true
   confd:
     kube_controller_manager.yaml: |-
       ad_identifiers:
@@ -52,31 +54,26 @@ datadog:
       name: etcd-certs
     - mountPath: /etc/datadog-agent/conf.d/etcd.d
       name: empty-dir
-systemProbe:
-  enabled: true
-  debugPort: 0
-  enableConntrack: true
-  seccompRoot: /var/lib/kubelet/seccomp
-  bpfDebug: false
-  apparmor: unconfined
 clusterAgent:
   enabled: true
   containerName: cluster-agent
   image:
     repository: datadog/cluster-agent
     tag: latest
-    pullPolicy: IfNotPresent
-  tokenExistingSecret: dd
   replicas: 1
+  tokenExistingSecret: dd
   metricsProvider:
     enabled: false
   clusterChecks:
     enabled: true
-  resources: {}
-rbac:
-  create: true
-  serviceAccountName: default
-tolerations: []
+  confd:
+    nginx_ingress_controller.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: http://nginx-nginx-ingress-controller-metrics:9913/metrics
+systemProbe:
+  enabled: true
 kubeStateMetrics:
   enabled: true
 kube-state-metrics:
@@ -84,33 +81,28 @@ kube-state-metrics:
     create: true
   serviceAccount:
     create: true
-    name:
 daemonset:
   enabled: true
+  useHostPort: true
   tolerations:
     - key: node-role.kubernetes.io/master
       effect: NoSchedule
-  containers:
-    agent:
-      resources: {}
-    processAgent:
-      resources: {}
-    traceAgent:
-      resources: {}
-    systemProbe:
-      resources: {}
-deployment:
-  enabled: false
-  replicas: 1
-  affinity: {}
-  tolerations: []
-  service:
-    type: ClusterIP
-    annotations: {}
-clusterchecksDeployment:
-  enabled: false
-  rbac:
-    dedicated: false
-    serviceAccountName: default
-  replicas: 2
-  resources: {}
+  useConfigMap: true
+  customAgentConfig:
+    listeners:
+      - name: kubelet
+    config_providers:
+      - name: kubelet
+        polling: true
+    apm_config:
+      enabled: true
+      apm_non_local_traffic: true
+      obfuscation:
+        - name: "http.url"
+          pattern: "Email=[^&]+"
+          repl: "Email=?"
+        - name: "http.url"
+          pattern: "customerId=[^&]+"
+          repl: "customerId=?"
+    jmx_use_cgroup_memory_limit: true
+
