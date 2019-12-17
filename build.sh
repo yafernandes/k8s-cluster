@@ -19,6 +19,10 @@ done
 cd ${LOC}/ansible
 ansible-playbook -i inventory.txt main.yaml
 
-cd ${LOC}/kubernetes
-./dashboard-setup.sh
-./datadog-setup.sh
+# cd ${LOC}/kubernetes
+# ./dashboard-setup.sh
+# ./datadog-setup.sh
+
+cd ${LOC}/kubernetes/helm
+./deploy.sh
+
