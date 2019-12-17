@@ -19,6 +19,14 @@ resource "aws_route53_record" "worker" {
   records = ["${aws_instance.worker[count.index].public_dns}"]
 }
 
+resource "aws_route53_record" "dashboard" {
+  zone_id = "${data.aws_route53_zone.pipsquack.zone_id}"
+  name    = "dashboard.k8s"
+  type    = "CNAME"
+  ttl     = "60"
+  records = aws_instance.worker.*.public_dns
+}
+
 output "workers" {
   value = "${aws_route53_record.worker[*].fqdn}"
 }
