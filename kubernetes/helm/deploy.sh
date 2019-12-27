@@ -3,22 +3,15 @@
 
 kubectl create secret generic dd --from-env-file=../secrets.txt
 
-kubectl create -f tiller-rbac-config.yaml
-helm init --service-account tiller
-
 # kubectl apply -f ../metrics-server/deploy/1.8+
 
-# read -p "Press [Enter] to contiue..."
-
-sleep 60
-
-helm install -f datadog-values.yaml --name datadog stable/datadog
+helm install datadog stable/datadog -f datadog-values.yaml
 
 kubectl apply -f nginx-configmap.yaml
 
-helm install -f nginx-values.yaml --name nginx stable/nginx-ingress
+helm install nginx stable/nginx-ingress -f nginx-values.yaml
 
-helm install -f dashboard-values.yaml --name dashboard stable/kubernetes-dashboard
+helm install dashboard stable/kubernetes-dashboard -f dashboard-values.yaml
 
 # helm upgrade -f datadog-values.yaml datadog stable/datadog --recreate-pods
 
