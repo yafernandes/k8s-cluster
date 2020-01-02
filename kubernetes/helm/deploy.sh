@@ -11,7 +11,8 @@ kubectl apply -f nginx-configmap.yaml
 
 helm install nginx stable/nginx-ingress -f nginx-values.yaml
 
-helm install dashboard stable/kubernetes-dashboard -f dashboard-values.yaml
+# helm install dashboard stable/kubernetes-dashboard -f dashboard-values.yaml
+kubectl apply -f dashboard-v2.yaml
 
 # helm upgrade -f datadog-values.yaml datadog stable/datadog --recreate-pods
 
