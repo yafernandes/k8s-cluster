@@ -85,8 +85,7 @@ daemonset:
   enabled: true
   useHostPort: true
   tolerations:
-    - key: node-role.kubernetes.io/master
-      effect: NoSchedule
+    - operator: Exists
   useConfigMap: true
   customAgentConfig:
     listeners:
