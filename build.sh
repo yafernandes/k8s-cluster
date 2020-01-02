@@ -1,3 +1,5 @@
+set -e
+
 LOC=$(cd `dirname $0` && pwd)
 USERNAME=admin
 
