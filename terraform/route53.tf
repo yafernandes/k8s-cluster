@@ -3,30 +3,30 @@ data "aws_route53_zone" "pipsquack" {
 }
 
 resource "aws_route53_record" "master" {
-  zone_id = "${data.aws_route53_zone.pipsquack.zone_id}"
+  zone_id = data.aws_route53_zone.pipsquack.zone_id
   name    = "master.k8s"
   type    = "CNAME"
   ttl     = "60"
-  records = ["${aws_instance.master.public_dns}"]
+  records = [aws_instance.master.public_dns]
 }
 
 resource "aws_route53_record" "worker" {
-  count   = "${length(aws_instance.worker)}"
-  zone_id = "${data.aws_route53_zone.pipsquack.zone_id}"
+  count   = length(aws_instance.worker)
+  zone_id = data.aws_route53_zone.pipsquack.zone_id
   name    = "worker${format("%02v", count.index)}.k8s"
   type    = "CNAME"
   ttl     = "60"
-  records = ["${aws_instance.worker[count.index].public_dns}"]
+  records = [aws_instance.worker[count.index].public_dns]
 }
 
 resource "aws_route53_record" "dashboard" {
-  zone_id = "${data.aws_route53_zone.pipsquack.zone_id}"
+  zone_id = data.aws_route53_zone.pipsquack.zone_id
   name    = "dashboard.k8s"
   type    = "CNAME"
   ttl     = "60"
-  records = aws_instance.worker.*.public_dns
+  records = [aws_instance.master.public_dns]
 }
 
 output "workers" {
-  value = "${aws_route53_record.worker[*].fqdn}"
+  value = aws_route53_record.worker[*].fqdn
 }

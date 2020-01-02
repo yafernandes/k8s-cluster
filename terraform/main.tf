@@ -1,19 +1,19 @@
 provider "aws" {
-  region                  = "${var.region}"
+  region                  = var.region
   shared_credentials_file = "/Users/alex.fernandes/.aws/credentials"
   profile                 = "default"
 }
 
 resource "aws_key_pair" "main" {
-  public_key = "${file("${var.ssh_public_key_file}")}"
+  public_key = file(var.ssh_public_key_file)
 }
 
 resource "aws_instance" "master" {
-  ami             = "${data.aws_ami.debian9.id}"
-  instance_type   = "t2.xlarge"
-  subnet_id       = "${aws_subnet.main.id}"
-  security_groups = ["${aws_security_group.main.id}"]
-  key_name        = "${aws_key_pair.main.key_name}"
+  ami             = data.aws_ami.debian9.id
+  instance_type   = var.master_instance_type
+  subnet_id       = aws_subnet.main.id
+  security_groups = [aws_security_group.main.id]
+  key_name        = aws_key_pair.main.key_name
 
   root_block_device {
     volume_size = 13
@@ -31,12 +31,12 @@ resource "aws_instance" "master" {
 }
 
 resource "aws_instance" "worker" {
-  count           = "${var.workers_count}"
-  ami             = "${data.aws_ami.debian9.id}"
-  instance_type   = "t2.xlarge"
-  subnet_id       = "${aws_subnet.main.id}"
-  security_groups = ["${aws_security_group.main.id}"]
-  key_name        = "${aws_key_pair.main.key_name}"
+  count           = var.workers_count
+  ami             = data.aws_ami.debian9.id
+  instance_type   = var.worker_instance_type
+  subnet_id       = aws_subnet.main.id
+  security_groups = [aws_security_group.main.id]
+  key_name        = aws_key_pair.main.key_name
 
   root_block_device {
     volume_size = 13
