@@ -1,42 +1,50 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: stresser
-  labels:
-    app: stresser
-    com.datadoghq.ad.check.id: stresser-app
-    ca.pipsquack/subdomain: k8s.aws
 spec:
-  containers:
-  - name: small-workload
-    image: yaalexf/toolbox
-    command: ["/stress.sh"]
-    imagePullPolicy: Always
-    env:
-      - name: ACTIVITY
-        value: "180"
-      - name: IDLE
-        value: "60"
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "100m"
-      limits:
-        memory: "128Mi"
-        cpu: "200m"
-  - name: big-workload
-    image: yaalexf/toolbox
-    command: ["/stress.sh"]
-    imagePullPolicy: Always
-    env:
-      - name: ACTIVITY
-        value: "120"
-      - name: IDLE
-        value: "60"
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "256Mi"
-        cpu: "600m"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stresser
+  template:
+    metadata:
+      name: stresser
+      labels:
+        app: stresser
+        com.datadoghq.ad.check.id: stresser-app
+        ca.pipsquack/subdomain: k8s.aws
+    spec:
+      containers:
+      - name: small-workload
+        image: yaalexf/toolbox
+        command: ["/stress.sh"]
+        imagePullPolicy: Always
+        env:
+          - name: ACTIVITY
+            value: "180"
+          - name: IDLE
+            value: "60"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      - name: big-workload
+        image: yaalexf/toolbox
+        command: ["/stress.sh"]
+        imagePullPolicy: Always
+        env:
+          - name: ACTIVITY
+            value: "120"
+          - name: IDLE
+            value: "60"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "600m"
