@@ -9,7 +9,7 @@ resource "aws_key_pair" "main" {
 }
 
 resource "aws_instance" "master" {
-  ami             = data.aws_ami.debian9.id
+  ami             = data.aws_ami.ubuntu_1910.id
   instance_type   = var.master_instance_type
   subnet_id       = aws_subnet.main.id
   security_groups = [aws_security_group.main.id]
@@ -32,7 +32,7 @@ resource "aws_instance" "master" {
 
 resource "aws_instance" "worker" {
   count           = var.workers_count
-  ami             = data.aws_ami.debian9.id
+  ami             = data.aws_ami.ubuntu_1910.id
   instance_type   = var.worker_instance_type
   subnet_id       = aws_subnet.main.id
   security_groups = [aws_security_group.main.id]
@@ -51,4 +51,20 @@ resource "aws_instance" "worker" {
     Name    = "${var.name} Worker ${format("%02v", count.index)}"
     Creator = "alex.fernandes"
   }
+}
+
+resource "aws_efs_file_system" "main" {
+  tags = {
+    Name = "K8s Persistent Volume"
+  }
+}
+
+resource "aws_efs_mount_target" "main" {
+  file_system_id  = aws_efs_file_system.main.id
+  subnet_id       = aws_subnet.main.id
+  security_groups = [aws_security_group.main.id]
+}
+
+output "nfs" {
+  value = aws_efs_file_system.main.dns_name
 }
