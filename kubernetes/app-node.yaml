@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-node
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app-node
+  template:
+    metadata:
+      name: app-node
+      labels:
+        app: app-node
+    spec:
+      containers:
+      - name: app-node
+        image: yaalexf/app-node
+        imagePullPolicy: Always
+        env:
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: DD_SERVICE_NAME
+            value: "Node"
+          - name: DD_LOGS_INJECTION
+            value: "true"
+          - name: DD_TRACE_ANALYTICS_ENABLED
+            value: "true"
+          - name: DD_TRACE_GLOBAL_TAGS
+            value: "env:k8s-cluster"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: app-node
+  name: app-node
+spec:
+  ports:
+    - port: 8000
+      targetPort: 80
+  selector:
+    app: app-node
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: app-node
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  # host: master.k8s.aws.pipsquack.ca
+  - http:
+      paths:
+      - path: /app-node(/|$)(.*)
+        backend:
+          serviceName: app-node
+          servicePort: 8000
