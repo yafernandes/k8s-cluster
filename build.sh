@@ -1,10 +1,14 @@
 set -e
 
 LOC=$(cd `dirname $0` && pwd)
-USERNAME=admin
+USERNAME=ubuntu
 
 cd ${LOC}/terraform
 terraform apply --auto-approve
+
+sed -i .bak /k8s.aws.pipsquack.ca/d ~/.ssh/known_hosts
+sed -i .bak /master/d ~/.ssh/known_hosts
+sed -i .bak /worker/d ~/.ssh/known_hosts
 
 echo master ansible_host=master.k8s.aws.pipsquack.ca ansible_connection=ssh ansible_user=$USERNAME ansible_ssh_private_key_file=/Users/alex.fernandes/.ssh/alexf-key.pem > ${LOC}/ansible/inventory.txt
 for ENTRY in $(terraform output -json workers | jq --raw-output '.[]')
