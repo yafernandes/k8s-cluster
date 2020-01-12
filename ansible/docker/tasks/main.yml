@@ -1,81 +1,9 @@
-- name: Remove old docker
-  when: ansible_facts['os_family'] == "RedHat"
-  become: yes
-  package:
-    name:
-      - docker
-      - docker-client
-      - docker-common
-      - docker-latest
-      - docker-latest-logrotate
-      - docker-logrotate
-      - docker-engine
-    state: absent
-- name: Remove old docker
-  when: ansible_facts['os_family'] == "Debian"
-  become: yes
-  package:
-    name:
-      - docker
-      - docker-engine
-      - docker.io
-      - containerd
-      - runc
-    state: absent
 - name: Install required packages
-  when: ansible_facts['os_family'] == "RedHat"
-  become: yes
-  package:
-    name:
-      - device-mapper-persistent-data
-      - lvm2
-    state: present
-- name: Install required packages
-  when: ansible_facts['os_family'] == "Debian"
-  become: yes
-  package:
-    name:
-      - apt-transport-https
-      - ca-certificates
-      - curl
-      - gnupg2
-      - software-properties-common
-    state: present
-- name: Add Docker repo
-  when: ansible_facts['os_family'] == "RedHat"
-  become: yes
-  get_url:
-    url: https://download.docker.com/linux/centos/docker-ce.repo
-    dest: /etc/yum.repos.d/docker-ce.repo
-    force: yes
-- name: Add Docker GPG key
-  when: ansible_facts['os_family'] == "Debian"
-  become: yes
-  shell: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-  args:
-    warn: no
-- name: Add Docker repo
-  when: ansible_facts['os_family'] == "Debian"
-  become: yes
-  shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-- name: Update apt cache
-  when: ansible_facts['os_family'] == "Debian"
   become: yes
   apt:
-    update_cache: yes
-- name: Install Docker
-  become: yes
-  package:
     name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-    state: present
-- name: Create directory
-  become: yes
-  file:
-    path: /etc/systemd/system/docker.service.d
-    state: directory
+      - docker.io
+    update_cache: true
 - name: Start Docker
   become: yes
   systemd:
@@ -88,7 +16,7 @@
   group:
     name: docker
     state: present
-- name: Add centos user to docker group
+- name: Add user to docker group
   become: yes
   user:
     name: "{{ansible_user}}"

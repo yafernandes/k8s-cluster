@@ -1,15 +1,15 @@
 - name: upgrade all packages
   become: yes
-  package:
-    name: '*'
+  apt:
+    name: "*"
     state: latest
-- name: Set /etc/hostname
-  become: yes
-  lineinfile:
-    regex: ".*"
-    dest: /etc/hostname
-    line: "{{ansible_host}}"
+    update_cache: true
 - name: Set hostname
   become: yes
   hostname:
     name: "{{ansible_host}}"
+- name: Set /etc/hostname
+  become: yes
+  copy:
+    content: "{{ansible_host}}"
+    dest: /etc/hostname

@@ -5,43 +5,59 @@
     - name: Wait for machines to start
       wait_for_connection:
 
-- hosts: all
+- name: Prepare machines
+  hosts: all
+  gather_facts: no
   roles:
     - linux
     - docker
     - k8s-base
+
+- name: Enable RPF strict mode (net.ipv4.conf.all.rp_filter=1) - Calico requirement
+  hosts: all
+  become: yes
+  tasks:
+    - sysctl:
+        name: net.ipv4.conf.all.rp_filter
+        value: "1"
 
 - hosts: master
   roles:
     - k8s-master
 
 - hosts: workers
+  gather_facts: no
   roles:
     - k8s-worker
 
-- name: Open Read Only port
+- name: Opens kubelet read only port
   hosts: all
+  become: yes
   tasks:
-    - name: Udpate config file server
-      when: ansible_facts['os_family'] == "RedHat"
-      become: yes
-      lineinfile:
-        path: /etc/sysconfig/kubelet
-        regexp: '^(KUBELET_EXTRA_ARGS=.*)'
-        backrefs: yes
-        line: '\1 --read-only-port=10255'
-    - name: Udpate config file server
-      when: ansible_facts['os_family'] == "Debian"
-      become: yes
-      lineinfile:
-        path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-        regexp: '^(Environment="KUBELET_CONFIG_ARGS=.*)(")'
-        backrefs: yes
-        line: '\1 --read-only-port=10255\2'
-    - name: Restart Kubelets
-      become: yes
-      systemd:
+    - lineinfile:
+        path: /var/lib/kubelet/config.yaml
+        line: "readOnlyPort: 10255"
+    - systemd:
         name: kubelet
         state: restarted
-        enabled: yes
-        daemon_reload: yes
+
+- name: Set Kubernets kubeconfig on master
+  hosts: master
+  gather_facts: no
+  tasks:
+    - shell: kubeadm alpha kubeconfig user --client-name=alex --org=system:masters
+      become: yes
+      register: kubeconfig
+    - file:
+        path: /home/ubuntu/.kube
+        state: directory
+        owner: ubuntu
+    - copy:
+        content: "{{ kubeconfig.stdout }}"
+        dest: /home/ubuntu/.kube/config
+    - copy:
+        content: "{{ kubeconfig.stdout }}"
+        dest: /Users/alex.fernandes/.kube/config
+      delegate_to: localhost
+    - shell: kubectl config set clusters.kubernetes.server https://master.k8s.aws.pipsquack.ca:6443
+      delegate_to: localhost
