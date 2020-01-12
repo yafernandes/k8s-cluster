@@ -45,7 +45,7 @@ resource "aws_security_group" "main" {
   }
 
   ingress {
-    from_port   = 0
+    from_port   = 30443
     to_port     = 30443
     protocol    = "tcp"
     cidr_blocks = ["${data.dns_a_record_set.proxy.addrs[0]}/32"]
