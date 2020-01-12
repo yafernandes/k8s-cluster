@@ -15,6 +15,7 @@
 
 - name: Enable RPF strict mode (net.ipv4.conf.all.rp_filter=1) - Calico requirement
   hosts: all
+  gather_facts: no
   become: yes
   tasks:
     - sysctl:
@@ -32,6 +33,7 @@
 
 - name: Opens kubelet read only port
   hosts: all
+  gather_facts: no
   become: yes
   tasks:
     - lineinfile:
