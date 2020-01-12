@@ -2,6 +2,15 @@ data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
 
+data "dns_a_record_set" "proxy" {
+  host = "proxy.azure.pipsquack.ca"
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+  blacklisted_zone_ids = ["us-west-2d"]
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = "true"
@@ -14,6 +23,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "main" {
   vpc_id                  = aws_vpc.main.id
+  availability_zone_id = data.aws_availability_zones.available.zone_ids[0]
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
 
@@ -32,6 +42,13 @@ resource "aws_security_group" "main" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
+  }
+
+  ingress {
+    from_port   = 0
+    to_port     = 30443
+    protocol    = "tcp"
+    cidr_blocks = ["${data.dns_a_record_set.proxy.addrs[0]}/32"]
   }
 
   egress {
