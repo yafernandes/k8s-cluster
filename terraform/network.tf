@@ -7,7 +7,7 @@ data "dns_a_record_set" "proxy" {
 }
 
 data "aws_availability_zones" "available" {
-  state = "available"
+  state                = "available"
   blacklisted_zone_ids = ["us-west-2d"]
 }
 
@@ -23,7 +23,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "main" {
   vpc_id                  = aws_vpc.main.id
-  availability_zone_id = data.aws_availability_zones.available.zone_ids[0]
+  availability_zone_id    = data.aws_availability_zones.available.zone_ids[0]
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
 
@@ -42,6 +42,7 @@ resource "aws_security_group" "main" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
+    self        = true
   }
 
   ingress {
@@ -62,15 +63,6 @@ resource "aws_security_group" "main" {
     Name    = var.name
     Creator = "alex.fernandes"
   }
-}
-
-resource "aws_security_group_rule" "self_ref" {
-  security_group_id        = aws_security_group.main.id
-  type                     = "ingress"
-  from_port                = 0
-  to_port                  = 0
-  protocol                 = "-1"
-  source_security_group_id = aws_security_group.main.id
 }
 
 resource "aws_internet_gateway" "main" {
