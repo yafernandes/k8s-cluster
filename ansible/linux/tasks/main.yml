@@ -1,4 +1,4 @@
-- name: upgrade all packages
+- name: Upgrade all packages
   become: yes
   apt:
     name: "*"
