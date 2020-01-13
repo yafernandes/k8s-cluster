@@ -1,8 +1,12 @@
 - name: Run Kubeadm
   become: yes
   shell: kubeadm init --kubernetes-version=1.16.4 --service-cidr=172.16.0.0/12 --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_facts.fqdn}},master.k8s.aws.pipsquack.ca,{{ansible_facts.all_ipv4_addresses | join(',')}}
+  register: kubeadm_init
   args:
     creates: /etc/kubernetes/admin.conf
+- name: kubeadm init output
+  debug:
+    var: kubeadm_init.stderr_lines
 - name: Install Calico
   become: yes
   shell: kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml --kubeconfig=/etc/kubernetes/admin.conf
