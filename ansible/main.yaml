@@ -13,12 +13,40 @@
     - docker
     - k8s-base
 
-- name: Enable RPF strict mode (net.ipv4.conf.all.rp_filter=1) - Calico requirement
+- name: Kubernetes requirements
   hosts: all
   gather_facts: no
   become: yes
   tasks:
-    - sysctl:
+    - name: Sets Docker cgroup driver to systemd
+      copy:
+        content: |
+          {
+            "exec-opts": ["native.cgroupdriver=systemd"],
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "100m"
+            },
+            "storage-driver": "overlay2"
+          }
+        dest: /etc/docker/daemon.json
+    - name: Create systemd directory
+      file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+    - name: Restart Docker
+      systemd:
+        name: docker
+        state: restarted
+        daemon_reload: yes
+
+- name: Calico requirements
+  hosts: all
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Enable RPF strict mode - net.ipv4.conf.all.rp_filter=1
+      sysctl:
         name: net.ipv4.conf.all.rp_filter
         value: "1"
 
@@ -36,10 +64,12 @@
   gather_facts: no
   become: yes
   tasks:
-    - lineinfile:
+    - name: Adds the option to the config.yaml file
+      lineinfile:
         path: /var/lib/kubelet/config.yaml
         line: "readOnlyPort: 10255"
-    - systemd:
+    - name: Restart kubelet
+      systemd:
         name: kubelet
         state: restarted
 
@@ -47,19 +77,23 @@
   hosts: master
   gather_facts: no
   tasks:
-    - shell: kubeadm alpha kubeconfig user --client-name=alex --org=system:masters
+    - name: Generates the kubeconfig content
+      shell: kubeadm alpha kubeconfig user --client-name=alex --org=system:masters
       become: yes
       register: kubeconfig
-    - file:
+    - name: Creates server .kube directory
+      file:
         path: /home/ubuntu/.kube
         state: directory
-        owner: ubuntu
-    - copy:
+    - name: Create kubeconfig file
+      copy:
         content: "{{ kubeconfig.stdout }}"
         dest: /home/ubuntu/.kube/config
-    - copy:
+    - name: Copy kubeconfig to local machine
+      copy:
         content: "{{ kubeconfig.stdout }}"
         dest: /Users/alex.fernandes/.kube/config
       delegate_to: localhost
-    - shell: kubectl config set clusters.kubernetes.server https://master.k8s.aws.pipsquack.ca:6443
+    - name: Updates the server url to use the public DNS host name
+      shell: kubectl config set clusters.kubernetes.server https://master.k8s.aws.pipsquack.ca:6443
       delegate_to: localhost
