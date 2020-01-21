@@ -3,8 +3,8 @@ persistence:
 master:
   ingress:
     enabled: true
-    hostName: nginx.k8s.aws.pipsquack.ca
+    hostName: jenkins.k8s.aws.pipsquack.ca
   installPlugins:
-    - kubernetes:1.23.1
-    - git:4.1.0
-    - datadog:1.0.0
+    - kubernetes
+    - git
+    - datadog
