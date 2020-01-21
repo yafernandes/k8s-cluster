@@ -10,7 +10,7 @@
   become: yes
   apt:
     name:
-      - kubelet=1.16.4-00
-      - kubeadm=1.16.4-00
-      - kubectl=1.16.4-00
+      - kubelet=1.16.6-00
+      - kubeadm=1.16.6-00
+      - kubectl=1.16.6-00
     update_cache: yes
