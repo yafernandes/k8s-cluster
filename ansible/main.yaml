@@ -2,10 +2,10 @@
   hosts: all
   gather_facts: no
   tasks:
-    - name: Wait for machines to start
+    - name: Waiting...
       wait_for_connection:
 
-- name: Prepare machines
+- name: Handle prereqs
   hosts: all
   gather_facts: no
   roles:
@@ -50,11 +50,13 @@
         name: net.ipv4.conf.all.rp_filter
         value: "1"
 
-- hosts: master
+- name: Install master
+  hosts: master
   roles:
     - k8s-master
 
-- hosts: workers
+- name: Join master
+  hosts: workers
   gather_facts: no
   roles:
     - k8s-worker

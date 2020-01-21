@@ -23,7 +23,7 @@ spec:
               fieldRef:
                 fieldPath: status.hostIP
           - name: DD_SERVICE_NAME
-            value: "Node"
+            value: "NodeJS"
           - name: DD_LOGS_INJECTION
             value: "true"
           - name: DD_TRACE_ANALYTICS_ENABLED
