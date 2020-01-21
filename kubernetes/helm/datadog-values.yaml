@@ -1,6 +1,5 @@
 image:
   repository: datadog/agent
-  tag: latest
 rbac:
   create: true
 datadog:
