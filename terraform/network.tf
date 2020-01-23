@@ -2,6 +2,10 @@ data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
 
+data "http" "dd_ip_ranges" {
+  url = "https://ip-ranges.datadoghq.com/"
+}
+
 data "dns_a_record_set" "proxy" {
   host = "proxy.azure.pipsquack.ca"
 }
@@ -42,6 +46,15 @@ resource "aws_security_group" "main" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
+    self        = true
+  }
+
+// Datadog webhooks origins
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = jsondecode(data.http.dd_ip_ranges.body).webhooks.prefixes_ipv4
     self        = true
   }
 
