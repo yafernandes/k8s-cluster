@@ -1,0 +1,18 @@
+persistence:
+  enabled: false
+master:
+  adminPassword: letmein
+  useSecurity: false
+  csrf:
+    defaultCrumbIssuer:
+      enabled: false
+  ingress:
+    enabled: true
+    hostName: jenkins.k8s.aws.pipsquack.ca
+  installPlugins:
+    - workflow-job
+    - workflow-aggregator
+    - kubernetes
+    - kubernetes-cd
+    - git
+    - datadog

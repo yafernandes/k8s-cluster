@@ -1,0 +1,16 @@
+podTemplate(containers: [
+    containerTemplate(name: 'deployment', image: 'yaalexf/kubectl', ttyEnabled: true, command: 'cat')
+  ]) {
+  node(POD_LABEL) {
+    stage('Run shell') {
+      container('deployment') {
+        sh '''
+        pwd
+        ls -la
+        export
+        /kubectl get all -A
+        '''
+      }
+    }
+  }
+}

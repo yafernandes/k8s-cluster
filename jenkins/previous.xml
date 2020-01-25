@@ -1,0 +1,34 @@
+
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.36">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.datadog.jenkins.plugins.datadog.DatadogJobProperty plugin="datadog@1.0.1">
+      <enableFile>false</enableFile>
+      <tagFile></tagFile>
+      <enableProperty>false</enableProperty>
+      <tagProperties></tagProperties>
+      <emitSCMEvents>true</emitSCMEvents>
+    </org.datadog.jenkins.plugins.datadog.DatadogJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.78">
+    <script>podTemplate(containers: [
+    containerTemplate(name: &apos;deployment&apos;, image: &apos;yaalexf/jenkins-worker&apos;, ttyEnabled: true, command: &apos;cat&apos;)
+  ]) {
+  node(POD_LABEL) {
+    stage(&apos;Run shell&apos;) {
+      container(&apos;deployment&apos;) {
+        sh &apos;&apos;&apos;
+        /kubectl apply -f /previous.yaml
+        &apos;&apos;&apos;
+      }
+    }
+  }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
