@@ -23,6 +23,31 @@ data "aws_ami" "ubuntu_1910" {
   }
 }
 
+data "aws_ami" "ubuntu_1910_arm" {
+  owners      = ["aws-marketplace"]
+  most_recent = "true"
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-eoan-19.10-arm64-server*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+}
+
 data "aws_ami" "ubuntu_1910_min" {
   owners      = ["aws-marketplace"]
   most_recent = "true"

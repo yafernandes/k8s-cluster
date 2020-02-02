@@ -5,6 +5,7 @@ provider "aws" {
 }
 
 resource "aws_key_pair" "main" {
+  key_name   = "alexf"
   public_key = file(var.ssh_public_key_file)
 }
 
@@ -49,6 +50,28 @@ resource "aws_instance" "worker" {
 
   volume_tags = {
     Name    = "${var.name} Worker ${format("%02v", count.index)}"
+    Creator = "alex.fernandes"
+  }
+}
+
+resource "aws_instance" "proxy" {
+  ami             = data.aws_ami.ubuntu_1910_arm.id
+  instance_type   = "a1.medium"
+  subnet_id       = aws_subnet.main.id
+  security_groups = [aws_security_group.proxy.id]
+  key_name        = aws_key_pair.main.key_name
+
+  root_block_device {
+    volume_size = 13
+  }
+
+  tags = {
+    Name    = "${var.name} proxy"
+    Creator = "alex.fernandes"
+  }
+
+  volume_tags = {
+    Name    = "${var.name} proxy"
     Creator = "alex.fernandes"
   }
 }

@@ -58,9 +58,10 @@ resource "aws_security_group" "main" {
     self        = true
   }
 
+// Kubernetes default Nodeport range
   ingress {
-    from_port   = 30443
-    to_port     = 30443
+    from_port   = 30000
+    to_port     = 32767
     protocol    = "tcp"
     cidr_blocks = ["${data.dns_a_record_set.proxy.addrs[0]}/32"]
   }
@@ -77,6 +78,39 @@ resource "aws_security_group" "main" {
     Creator = "alex.fernandes"
   }
 }
+
+resource "aws_security_group" "proxy" {
+  vpc_id = aws_vpc.main.id
+  name   = "proxy_security_group"
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
+    self        = true
+  }
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    security_groups = [aws_security_group.main.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "${var.name} proxy"
+    Creator = "alex.fernandes"
+  }
+}
+
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id

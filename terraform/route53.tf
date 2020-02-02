@@ -27,6 +27,14 @@ resource "aws_route53_record" "dashboard" {
   records = [aws_instance.master.public_dns]
 }
 
+resource "aws_route53_record" "proxy" {
+  zone_id = data.aws_route53_zone.pipsquack.zone_id
+  name    = "proxy.k8s"
+  type    = "CNAME"
+  ttl     = "60"
+  records = [aws_instance.proxy.public_dns]
+}
+
 resource "aws_route53_record" "nginx" {
   count   = length(aws_instance.worker)
   zone_id = data.aws_route53_zone.pipsquack.zone_id
