@@ -23,14 +23,6 @@ datadog:
       init_config:
       instances:
         - prometheus_url: http://%%host%%:10251/metrics
-    kube_apiserver_metrics.yaml: |-
-      ad_identifiers:
-        - kube-apiserver
-      init_config:
-      instances:
-        - prometheus_url: "%%host%%:6443/metrics"
-          tags:
-            - "apiserver:%%host%%"
     etcd.yaml: |-
       ad_identifiers:
         - etcd
