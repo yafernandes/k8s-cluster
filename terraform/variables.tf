@@ -1,6 +1,6 @@
-variable "name" {}
-
 variable "region" {}
+
+variable "cluster_name" {}
 
 variable "ssh_public_key_file" {}
 

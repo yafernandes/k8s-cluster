@@ -1,4 +1,3 @@
-LOC=$(cd `dirname $0` && pwd)
-
-cd ${LOC}/terraform
+cd terraform
 terraform destroy --auto-approve
+cd -

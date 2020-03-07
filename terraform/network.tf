@@ -20,7 +20,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = "true"
 
   tags = {
-    Name    = var.name
+    Name    = var.cluster_name
     Creator = "alex.fernandes"
   }
 }
@@ -32,7 +32,7 @@ resource "aws_subnet" "main" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name    = var.name
+    Name    = var.cluster_name
     Creator = "alex.fernandes"
   }
 }
@@ -49,7 +49,7 @@ resource "aws_security_group" "main" {
     self        = true
   }
 
-// Datadog webhooks origins
+  // Datadog webhooks origins
   ingress {
     from_port   = 0
     to_port     = 0
@@ -58,7 +58,7 @@ resource "aws_security_group" "main" {
     self        = true
   }
 
-// Kubernetes default Nodeport range
+  // Kubernetes default Nodeport range
   ingress {
     from_port   = 30000
     to_port     = 32767
@@ -74,7 +74,7 @@ resource "aws_security_group" "main" {
   }
 
   tags = {
-    Name    = var.name
+    Name    = var.cluster_name
     Creator = "alex.fernandes"
   }
 }
@@ -92,9 +92,9 @@ resource "aws_security_group" "proxy" {
   }
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port         = 0
+    to_port           = 0
+    protocol          = "-1"
     security_groups = [aws_security_group.main.id]
   }
 
@@ -106,9 +106,18 @@ resource "aws_security_group" "proxy" {
   }
 
   tags = {
-    Name    = "${var.name} proxy"
+    Name    = "${var.cluster_name} proxy"
     Creator = "alex.fernandes"
   }
+}
+
+resource "aws_security_group_rule" "proxy" {
+  type                     = "egress"
+  from_port                = 3128
+  to_port                  = 3128
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.main.id
+  source_security_group_id = aws_security_group.proxy.id
 }
 
 
@@ -116,7 +125,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name    = var.name
+    Name    = var.cluster_name
     Creator = "alex.fernandes"
   }
 }
@@ -130,7 +139,7 @@ resource "aws_route_table" "main" {
   }
 
   tags = {
-    Name    = var.name
+    Name    = var.cluster_name
     Creator = "alex.fernandes"
   }
 }

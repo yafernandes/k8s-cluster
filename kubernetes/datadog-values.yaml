@@ -1,0 +1,81 @@
+datadog:
+  apiKeyExistingSecret: dd
+  apm:
+    enabled: true
+  logs:
+    enabled: true
+    containerCollectAll: true
+  processAgent:
+    enabled: true
+  systemProbe:
+    enabled: true
+  clusterChecks:
+    enabled: true
+  kubeStateMetricsEnabled: true
+  dogstatsd:
+    nonLocalTraffic: true
+  # env:
+  #   - name: HTTP_PROXY
+  #     value: http://proxy.k8s.aws.pipsquack.ca:3128/
+  #   - name: HTTPS_PROXY
+  #     value: http://proxy.k8s.aws.pipsquack.ca:3128/
+  confd:
+    kube_controller_manager.yaml: |-
+      ad_identifiers:
+        - kube-controller-manager
+      init_config:
+      instances:
+        - prometheus_url: http://%%host%%:10252/metrics
+    kube_scheduler.yaml: |-
+      ad_identifiers:
+        - kube-scheduler
+      init_config:
+      instances:
+        - prometheus_url: http://%%host%%:10251/metrics
+    etcd.yaml: |-
+      ad_identifiers:
+        - etcd
+      init_config:
+      instances:
+        - use_preview: true
+          prometheus_url: https://%%host%%:2379/metrics
+          ssl_ca_cert: /etc/kubernetes/pki/etcd/ca.crt
+          ssl_cert: /etc/kubernetes/pki/etcd/peer.crt
+          ssl_private_key: /etc/kubernetes/pki/etcd/peer.key
+    nginx_ingress_controller.yaml: |-
+      ad_identifiers:
+        - nginx-ingress-controller
+      init_config:
+      instances:
+        - prometheus_url: http://%%host%%:10254/metrics
+    nginx.yaml: |-
+      ad_identifiers:
+        - nginx-ingress-controller
+      init_config:
+      instances:
+        - nginx_status_url: http://%%host%%:18080/metrics
+agents:
+  enabled: true
+  rbac:
+    create: true
+  volumeMounts:
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+    - mountPath: /etc/datadog-agent/conf.d/etcd.d
+      name: empty-dir
+    - mountPath: /etc/datadog-agent/conf.d/kubelet.d
+      name: empty-dir
+  volumes:
+    - name: etcd-certs
+      hostPath:
+        path: /etc/kubernetes/pki/etcd
+        type: DirectoryOrCreate
+    - name: empty-dir
+      emptyDir: {}
+  tolerations:
+    - operator: Exists
+clusterAgent:
+  enabled: true
+  rbac:
+    create: true
+S

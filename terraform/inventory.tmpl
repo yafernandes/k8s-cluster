@@ -1,0 +1,16 @@
+${master.tags.dns_name} ansible_host=${master.tags.dns_name}.${cluster_name}.aws.pipsquack.ca role=master
+%{ for worker in workers ~}
+${worker.tags.dns_name} ansible_host=${worker.tags.dns_name}.${cluster_name}.aws.pipsquack.ca role=worker
+%{ endfor ~}
+${proxy.tags.dns_name} ansible_host=${proxy.tags.dns_name}.${cluster_name}.aws.pipsquack.ca role=proxy
+
+[masters]
+${master.tags.dns_name}
+
+[workers]
+%{ for worker in workers ~}
+${worker.tags.dns_name}
+%{ endfor ~}
+
+[proxies]
+${proxy.tags.dns_name}

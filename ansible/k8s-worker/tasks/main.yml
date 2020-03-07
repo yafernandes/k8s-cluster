@@ -1,3 +1,0 @@
-- name: Joining cluster
-  become: yes
-  shell: "{{ hostvars['master'].join_cmd }}"

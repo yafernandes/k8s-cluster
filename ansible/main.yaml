@@ -5,16 +5,76 @@
     - name: Waiting...
       wait_for_connection:
 
-- name: Handle prereqs
+- name: Update OS
   hosts: all
   gather_facts: no
-  roles:
-    - linux
-    - docker
-    - k8s-base
+  become: yes
+  tasks:
+    - name: Upgrade all packages
+      apt:
+        name: "*"
+        state: latest
+        update_cache: true
+    - name: Set hostname
+      hostname:
+        name: "{{ansible_host}}"
+    - name: Set /etc/hostname
+      copy:
+        content: "{{ansible_host}}"
+        dest: /etc/hostname
+
+- name: Install Dockers
+  hosts:
+    - masters
+    - workers
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+        update_cache: true
+    - name: Start Docker
+      systemd:
+        name: docker
+        state: restarted
+        enabled: yes
+        daemon_reload: yes
+    - name: Create docker group
+      group:
+        name: docker
+        state: present
+    - name: Add user to docker group
+      user:
+        name: "{{ansible_user}}"
+        group: docker
+
+- name: Install Kubernetes binaries
+  hosts:
+    - masters
+    - workers
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Add Kubernetes GPG key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    - name: Add Kubernetes repo
+      apt_repository:
+        repo: 'deb https://apt.kubernetes.io/ kubernetes-xenial main'
+    - name: Install Kubernetes packages
+      apt:
+        name:
+          - kubelet=1.17.3-00
+          - kubeadm=1.17.3-00
+          - kubectl=1.17.3-00
+        update_cache: yes
 
 - name: Kubernetes requirements
-  hosts: all
+  hosts:
+    - masters
+    - workers
   gather_facts: no
   become: yes
   tasks:
@@ -41,7 +101,9 @@
         daemon_reload: yes
 
 - name: Calico requirements
-  hosts: all
+  hosts:
+    - masters
+    - workers
   gather_facts: no
   become: yes
   tasks:
@@ -50,19 +112,41 @@
         name: net.ipv4.conf.all.rp_filter
         value: "1"
 
-- name: Install master
+- name: Init master
   hosts: master
-  roles:
-    - k8s-master
+  tasks:
+    - name: Run Kubeadm
+      become: yes
+      shell: kubeadm init --kubernetes-version=1.17.3 --service-cidr=172.16.0.0/12 --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_facts.fqdn}},master.k8s.aws.pipsquack.ca,{{ansible_facts.all_ipv4_addresses | join(',')}}
+      register: kubeadm_init
+      args:
+        creates: /etc/kubernetes/admin.conf
+    - name: kubeadm init output
+      debug:
+        var: kubeadm_init.stderr_lines
+    - name: Install Calico
+      become: yes
+      shell: kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml --kubeconfig=/etc/kubernetes/admin.conf
+    - name: Get Kubernets join cluster command
+      become: yes
+      shell: kubeadm token create --print-join-command
+      register: join_cmd
+    - name: Export join command
+      set_fact:
+        join_cmd: "{{ join_cmd.stdout }}"
 
 - name: Join master
   hosts: workers
   gather_facts: no
-  roles:
-    - k8s-worker
+  become: yes
+  tasks:
+    - name: Joining cluster
+      shell: "{{ hostvars['master'].join_cmd }}"
 
 - name: Opens kubelet read only port
-  hosts: all
+  hosts:
+    - masters
+    - workers
   gather_facts: no
   become: yes
   tasks:
@@ -99,3 +183,41 @@
     - name: Updates the server url to use the public DNS host name
       shell: kubectl config set clusters.kubernetes.server https://master.k8s.aws.pipsquack.ca:6443
       delegate_to: localhost
+
+- name: Installs and configure Squid
+  hosts: proxies
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Install Squid
+      apt:
+        name:
+          - squid
+    - name: Copy squid.conf
+      copy:
+         content: |-
+            http_access allow all
+            http_port 3128
+         dest: /etc/squid/squid.conf
+    - name: Restart Squid
+      systemd:
+        name: squid
+        state: restarted
+
+- name: Set up system wide proxies
+  hosts:
+    - masters
+    - workers
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Set http_proxy
+      lineinfile:
+        path: /etc/environment
+        regexp: '^http_proxy='
+        line: http_proxy=http://proxy.k8s.aws.pipsquack.ca:3128/
+    - name: Set https_proxy
+      lineinfile:
+        path: /etc/environment
+        regexp: '^https_proxy='
+        line: https_proxy=http://proxy.k8s.aws.pipsquack.ca:3128/
