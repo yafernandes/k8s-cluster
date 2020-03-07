@@ -66,9 +66,9 @@
     - name: Install Kubernetes packages
       apt:
         name:
-          - kubelet={{kube_version}}-00
-          - kubeadm={{kube_version}}-00
-          - kubectl={{kube_version}}-00
+          - kubelet=1.17.3-00
+          - kubeadm=1.17.3-00
+          - kubectl=1.17.3-00
         update_cache: yes
 
 - name: Kubernetes requirements
@@ -117,7 +117,7 @@
   tasks:
     - name: Run Kubeadm
       become: yes
-      shell: kubeadm init --kubernetes-version={{kube_version}} --service-cidr=172.16.0.0/12 --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_facts.fqdn}},master.k8s.aws.pipsquack.ca,{{ansible_facts.all_ipv4_addresses | join(',')}}
+      shell: kubeadm init --kubernetes-version=1.17.3 --service-cidr=172.16.0.0/12 --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_facts.fqdn}},master.k8s.aws.pipsquack.ca,{{ansible_facts.all_ipv4_addresses | join(',')}}
       register: kubeadm_init
       args:
         creates: /etc/kubernetes/admin.conf
