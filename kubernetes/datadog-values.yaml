@@ -54,6 +54,10 @@ datadog:
       init_config:
       instances:
         - nginx_status_url: http://%%host%%:18080/metrics
+    kubelet.yaml: |-
+      init_config:
+      instances:
+        - 
 agents:
   enabled: true
   rbac:
@@ -78,4 +82,3 @@ clusterAgent:
   enabled: true
   rbac:
     create: true
-S
