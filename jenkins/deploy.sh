@@ -7,9 +7,9 @@ cd jenkins-worker
 cd -
 
 echo "Waiting for Jenkins to go on Running state"
-kubectl get pods -w | grep -m 1 "jenkins.*Running"
+kubectl get pods -w | grep -m 1 "jenkins.*1/1.*Running"
 
 curl -d @latest.xml http://jenkins.k8s.aws.pipsquack.ca:30080/createItem?name=Deploy --header "Content-Type:application/xml"
 curl -d @previous.xml http://jenkins.k8s.aws.pipsquack.ca:30080/createItem?name=Rollback --header "Content-Type:application/xml"
 
-kubectl create -f jenkins-worker/previous.yaml
+kubectl apply -f jenkins-worker/previous.yaml

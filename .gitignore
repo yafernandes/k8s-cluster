@@ -45,3 +45,4 @@ kubernetes/metrics-server
 local
 jenkins/jenkins-worker/config
 .DS_Store
+.swp
