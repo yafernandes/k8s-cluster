@@ -164,7 +164,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: dca
+      serviceAccountName: datadog-cluster-agent
       containers:
         - name: datadog-cluster-agent
           image: datadog/cluster-agent
@@ -215,7 +215,7 @@ spec:
       volumes:
         - name: dd-confd
           configMap:
-            name: dd-cluster-agent-confd
+            name: dd-cluster-confd
 ---
 apiVersion: v1
 kind: Service
