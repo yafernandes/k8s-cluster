@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: datadog-agent
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: datadog-cluster-agent
+  namespace: default
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -106,18 +118,6 @@ rules:
     verbs:
       - get
       - update
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: datadog-agent
-  namespace: default
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: datadog-cluster-agent
-  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
