@@ -38,6 +38,12 @@ spec:
             name: traceport
             protocol: TCP
         env:
+          # - name: DD_HTTP_PROXY
+          #   value: http://proxy.k8s.aws.pipsquack.ca:3128/
+          # - name: DD_HTTPS_PROXY
+          #   value: http://proxy.k8s.aws.pipsquack.ca:3128/
+          # - name: DD_NO_PROXY
+          #   value: .k8s.aws.pipsquack.ca,.internal,.local,172.16.0.0/12,192.168.0.0/16
           - name: DD_API_KEY
             valueFrom:
               secretKeyRef:
@@ -177,6 +183,12 @@ spec:
               memory: "256Mi"
               cpu: "200m"
           env:
+            # - name: DD_HTTP_PROXY
+            #   value: http://proxy.k8s.aws.pipsquack.ca:3128/
+            # - name: DD_HTTPS_PROXY
+            #   value: http://proxy.k8s.aws.pipsquack.ca:3128/
+            # - name: DD_NO_PROXY
+            #   value: .k8s.aws.pipsquack.ca,.internal,.local,172.16.0.0/12,192.168.0.0/16
             - name: DD_API_KEY
               valueFrom:
                 secretKeyRef:
