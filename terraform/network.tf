@@ -73,6 +73,21 @@ resource "aws_security_group" "main" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  // Explicitly opens DNS ports so we can safely close broad Internet access (rule above)
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "6"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "17"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name    = var.cluster_name
     Creator = "alex.fernandes"
@@ -118,6 +133,8 @@ resource "aws_security_group_rule" "proxy" {
   protocol                 = "tcp"
   security_group_id        = aws_security_group.main.id
   source_security_group_id = aws_security_group.proxy.id
+  // Avoid cycle dependency when destroying the environemnt
+  depends_on = [aws_security_group.main, aws_security_group.proxy]
 }
 
 
