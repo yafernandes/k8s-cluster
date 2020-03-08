@@ -117,7 +117,7 @@
   tasks:
     - name: Run Kubeadm
       become: yes
-      shell: kubeadm init --kubernetes-version={{kube_version}} --service-cidr=172.16.0.0/12 --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_facts.fqdn}},master.k8s.aws.pipsquack.ca,{{ansible_facts.all_ipv4_addresses | join(',')}}
+      shell: kubeadm init --kubernetes-version={{kube_version}} --service-cidr=172.16.0.0/12 --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans={{ansible_facts.fqdn}},master.{{domain}},{{ansible_facts.all_ipv4_addresses | join(',')}}
       register: kubeadm_init
       args:
         creates: /etc/kubernetes/admin.conf
@@ -181,7 +181,7 @@
         dest: /Users/alex.fernandes/.kube/config
       delegate_to: localhost
     - name: Updates the server url to use the public DNS host name
-      shell: kubectl config set clusters.kubernetes.server https://master.k8s.aws.pipsquack.ca:6443
+      shell: kubectl config set clusters.kubernetes.server https://master.{{domain}}:6443
       delegate_to: localhost
 
 - name: Installs and configure Squid
@@ -214,10 +214,15 @@
     - name: Set http_proxy
       lineinfile:
         path: /etc/environment
-        regexp: '^http_proxy='
-        line: http_proxy=http://proxy.k8s.aws.pipsquack.ca:3128/
+        regexp: '^HTTP_PROXY='
+        line: HTTP_PROXY=http://proxy.{{domain}}:3128/
     - name: Set https_proxy
       lineinfile:
         path: /etc/environment
-        regexp: '^https_proxy='
-        line: https_proxy=http://proxy.k8s.aws.pipsquack.ca:3128/
+        regexp: '^HTTPS_PROXY='
+        line: HTTPS_PROXY=http://proxy.{{domain}}:3128/
+    - name: Set no_proxy
+      lineinfile:
+        path: /etc/environment
+        regexp: '^NO_PROXY='
+        line: NO_PROXY=.{{domain}}
