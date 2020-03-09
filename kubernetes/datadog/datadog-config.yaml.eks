@@ -7,20 +7,20 @@ data:
     cluster_check: true
     init_config:
     instances:
-      - prometheus_url: https://kubernetes/metrics
+      - prometheus_url: https://kubernetes.default/metrics
         ssl_ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         bearer_token_auth: true
   kube_scheduler.yaml: |-
     cluster_check: true
     init_config:
     instances:
-      - prometheus_url: https://kubernetes/metrics
+      - prometheus_url: https://kubernetes.default/metrics
         ssl_ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         bearer_token_auth: true
   kube_apiserver_metrics.yaml: |-
     cluster_check: true
     init_config:
     instances:
-      - prometheus_url: https://kubernetes/metrics
+      - prometheus_url: https://kubernetes.default/metrics
         ssl_ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         bearer_token_auth: true
