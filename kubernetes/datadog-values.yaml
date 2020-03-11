@@ -9,6 +9,7 @@ datadog:
     enabled: true
   systemProbe:
     enabled: true
+    seccomp: "runtime/default"
   clusterChecks:
     enabled: true
   kubeStateMetricsEnabled: true
@@ -54,10 +55,6 @@ datadog:
       init_config:
       instances:
         - nginx_status_url: http://%%host%%:18080/metrics
-    kubelet.yaml: |-
-      init_config:
-      instances:
-        - 
 agents:
   enabled: true
   rbac:
@@ -66,8 +63,6 @@ agents:
     - mountPath: /etc/kubernetes/pki/etcd
       name: etcd-certs
     - mountPath: /etc/datadog-agent/conf.d/etcd.d
-      name: empty-dir
-    - mountPath: /etc/datadog-agent/conf.d/kubelet.d
       name: empty-dir
   volumes:
     - name: etcd-certs
