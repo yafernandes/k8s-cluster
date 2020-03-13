@@ -1,5 +1,6 @@
 datadog:
   apiKeyExistingSecret: dd
+  tags: "env:k8s"
   apm:
     enabled: true
   logs:
@@ -15,6 +16,7 @@ datadog:
   kubeStateMetricsEnabled: true
   dogstatsd:
     nonLocalTraffic: true
+    useHostPort: true
   # env:
   #   - name: HTTP_PROXY
   #     value: http://proxy.k8s.aws.pipsquack.ca:3128/
