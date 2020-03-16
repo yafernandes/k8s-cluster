@@ -8,6 +8,7 @@ datadog:
     containerCollectAll: true
   processAgent:
     enabled: true
+    processCollection: true
   systemProbe:
     enabled: true
     seccomp: "runtime/default"
