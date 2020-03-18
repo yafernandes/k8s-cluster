@@ -24,18 +24,6 @@ datadog:
   #   - name: HTTPS_PROXY
   #     value: http://proxy.k8s.aws.pipsquack.ca:3128/
   confd:
-    kube_controller_manager.yaml: |-
-      ad_identifiers:
-        - kube-controller-manager
-      init_config:
-      instances:
-        - prometheus_url: http://%%host%%:10252/metrics
-    kube_scheduler.yaml: |-
-      ad_identifiers:
-        - kube-scheduler
-      init_config:
-      instances:
-        - prometheus_url: http://%%host%%:10251/metrics
     etcd.yaml: |-
       ad_identifiers:
         - etcd
