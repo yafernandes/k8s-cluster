@@ -79,22 +79,6 @@ resource "aws_instance" "proxy" {
   }
 }
 
-resource "aws_efs_file_system" "main" {
-  tags = {
-    Name = "K8s Persistent Volume"
-  }
-}
-
-resource "aws_efs_mount_target" "main" {
-  file_system_id  = aws_efs_file_system.main.id
-  subnet_id       = aws_subnet.main.id
-  security_groups = [aws_security_group.main.id]
-}
-
-output "nfs" {
-  value = aws_efs_file_system.main.dns_name
-}
-
 resource "local_file" "ansible_inventory" {
   content  = templatefile("inventory.tmpl", { master = aws_instance.master, workers = aws_instance.worker, proxy = aws_instance.proxy, cluster_name = var.cluster_name })
   filename = "../ansible/inventory.txt"

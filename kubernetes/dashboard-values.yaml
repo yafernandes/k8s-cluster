@@ -1,9 +1,0 @@
-enableSkipLogin: true
-rbac:
-  clusterAdminRole: true
-ingress:
-  enabled: true
-  hosts:
-    - dashboard.k8s.aws.pipsquack.ca
-  annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
