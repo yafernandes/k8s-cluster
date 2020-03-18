@@ -1,5 +1,5 @@
 data "aws_route53_zone" "pipsquack" {
-  name = "aws.pipsquack.ca"
+  name = var.domain
 }
 
 resource "aws_route53_record" "master" {
