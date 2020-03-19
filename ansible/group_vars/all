@@ -1,5 +1,5 @@
 ansible_connection: "ssh"
 ansible_user: "ubuntu"
-ansible_ssh_private_key_file: "/Users/alex.fernandes/.ssh/alexf-key.pem"
-kube_version: "1.17.3"
+ansible_ssh_private_key_file: "/Users/alex.fernandes/.ssh/terraform.id_rsa"
+kube_version: "1.17.4"
 domain: "k8s.aws.pipsquack.ca"
