@@ -11,7 +11,6 @@ datadog:
     processCollection: true
   systemProbe:
     enabled: true
-    seccomp: "runtime/default"
   clusterChecks:
     enabled: true
   kubeStateMetricsEnabled: true
