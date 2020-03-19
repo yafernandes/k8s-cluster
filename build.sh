@@ -6,7 +6,7 @@ cd ansible
 ansible-playbook -i inventory.txt main.yaml
 cd -
 
-cd kubernetes/helm
-deploy.sh
+cd kubernetes
+./deploy.sh
 cd -
 
