@@ -29,7 +29,7 @@ spec:
           - name: DD_TRACE_ANALYTICS_ENABLED
             value: "true"
           - name: DD_TRACE_GLOBAL_TAGS
-            value: "env:k8s-cluster"
+            value: "env:k8s"
         resources:
           requests:
             memory: "64Mi"
@@ -47,7 +47,7 @@ metadata:
 spec:
   ports:
     - port: 8000
-      targetPort: 80
+      targetPort: 8080
   selector:
     app: app-node
 ---
