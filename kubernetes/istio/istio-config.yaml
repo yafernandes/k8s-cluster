@@ -1,0 +1,10 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  values:
+    global:
+      proxy:
+        tracer: datadog
+    pilot:
+      traceSampling: 100.0
+      enableProtocolSniffingForInbound: true
