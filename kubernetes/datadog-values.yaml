@@ -1,6 +1,7 @@
 datadog:
   apiKeyExistingSecret: dd
-  tags: "env:k8s"
+  tags:
+    - "env:k8s"
   apm:
     enabled: true
   logs:
@@ -49,6 +50,8 @@ agents:
   enabled: true
   rbac:
     create: true
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
   volumeMounts:
     - mountPath: /etc/kubernetes/pki/etcd
       name: etcd-certs
@@ -67,3 +70,16 @@ clusterAgent:
   enabled: true
   rbac:
     create: true
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
+  confd:
+    istio.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - istio_mesh_endpoint: "http://istio-telemetry.istio-system:42422/metrics"
+          mixer_endpoint: "http://istio-telemetry.istio-system:15014/metrics"
+          galley_endpoint: "http://istio-galley.istio-system:15014/metrics"
+          pilot_endpoint: "http://istio-pilot.istio-system:15014/metrics"
+          citadel_endpoint: "http://istio-citadel.istio-system:15014/metrics"
+          send_histograms_buckets: true
