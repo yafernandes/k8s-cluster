@@ -12,8 +12,7 @@
   tasks:
     - name: Upgrade all packages
       apt:
-        name: "*"
-        state: latest
+        upgrade: full
         update_cache: true
     - name: Set hostname
       hostname:
@@ -193,6 +192,7 @@
       apt:
         name:
           - squid
+        update_cache: true
     - name: Copy squid.conf
       copy:
          content: |-
