@@ -29,7 +29,7 @@ spec:
           - name: DD_TRACE_ANALYTICS_ENABLED
             value: "true"
           - name: DD_TRACE_GLOBAL_TAGS
-            value: "env:k8s"
+            value: "env:lab"
         resources:
           requests:
             memory: "32Mi"
