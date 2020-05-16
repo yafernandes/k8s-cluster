@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+spec:
+  containers:
+  - name: busybox
+    image: busybox:1.27
+    command:
+      - sleep
+      - "3600"
+    resources:
+      requests:
+        memory: "8Mi"
+        cpu: "100m"
+      limits:
+        memory: "64Mi"
+        cpu: "800m"
