@@ -1,0 +1,18 @@
+server:
+  dev:
+    enabled: true
+  annotations:
+    # Currently ignored when in dev mode
+    # https://github.com/hashicorp/vault-helm/blob/ac6089c45ef66d4e1eed0e279364ccbb2f8a6eda/templates/_helpers.tpl#L265
+    ad.datadoghq.com/vault.check_names: '["vault"]'
+    ad.datadoghq.com/vault.init_configs: '[{}]'
+    ad.datadoghq.com/vault.instances: '[{"api_url": "http://%%host%%:8200/v1","client_token": "root"}]'
+  standalone:
+    config: |
+      listener "tcp" {
+          address     = "http://0.0.0.0:8200"
+          tls_disable = 1
+          telemetry {
+            unauthenticated_metrics_access = true
+          }
+      }
