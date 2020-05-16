@@ -1,7 +1,5 @@
 datadog:
   apiKeyExistingSecret: dd
-  tags:
-    - "env:k8s"
   apm:
     enabled: true
   logs:
@@ -18,7 +16,12 @@ datadog:
   dogstatsd:
     nonLocalTraffic: true
     useHostPort: true
-  # env:
+  env:
+    - name: DD_ENV
+      value: "lab"
+  #     Required if kubelet readOnlyPort port is not available
+  #   - name: DD_KUBELET_TLS_VERIFY
+  #     value: false
   #   - name: HTTP_PROXY
   #     value: http://proxy.k8s.aws.pipsquack.ca:3128/
   #   - name: HTTPS_PROXY
@@ -31,21 +34,9 @@ datadog:
       instances:
         - use_preview: true
           prometheus_url: https://%%host%%:2379/metrics
-          ssl_ca_cert: /etc/kubernetes/pki/etcd/ca.crt
-          ssl_cert: /etc/kubernetes/pki/etcd/peer.crt
-          ssl_private_key: /etc/kubernetes/pki/etcd/peer.key
-    nginx_ingress_controller.yaml: |-
-      ad_identifiers:
-        - nginx-ingress-controller
-      init_config:
-      instances:
-        - prometheus_url: http://%%host%%:10254/metrics
-    nginx.yaml: |-
-      ad_identifiers:
-        - nginx-ingress-controller
-      init_config:
-      instances:
-        - nginx_status_url: http://%%host%%:18080/metrics
+          ssl_ca_cert: /host/etc/kubernetes/pki/etcd/ca.crt
+          ssl_cert: /host/etc/kubernetes/pki/etcd/peer.crt
+          ssl_private_key: /host/etc/kubernetes/pki/etcd/peer.key
 agents:
   enabled: true
   rbac:
@@ -53,7 +44,7 @@ agents:
   podAnnotations:
     sidecar.istio.io/inject: "false"
   volumeMounts:
-    - mountPath: /etc/kubernetes/pki/etcd
+    - mountPath: /host/etc/kubernetes/pki/etcd
       name: etcd-certs
     - mountPath: /etc/datadog-agent/conf.d/etcd.d
       name: empty-dir
@@ -72,14 +63,3 @@ clusterAgent:
     create: true
   podAnnotations:
     sidecar.istio.io/inject: "false"
-  confd:
-    istio.yaml: |-
-      cluster_check: true
-      init_config:
-      instances:
-        - istio_mesh_endpoint: "http://istio-telemetry.istio-system:42422/metrics"
-          mixer_endpoint: "http://istio-telemetry.istio-system:15014/metrics"
-          galley_endpoint: "http://istio-galley.istio-system:15014/metrics"
-          pilot_endpoint: "http://istio-pilot.istio-system:15014/metrics"
-          citadel_endpoint: "http://istio-citadel.istio-system:15014/metrics"
-          send_histograms_buckets: true
