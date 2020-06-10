@@ -7,4 +7,3 @@ spec:
         tracer: datadog
     pilot:
       traceSampling: 100.0
-      enableProtocolSniffingForInbound: true
