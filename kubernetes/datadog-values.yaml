@@ -16,9 +16,15 @@ datadog:
   dogstatsd:
     nonLocalTraffic: true
     useHostPort: true
+  podLabelsAsTags: 
+    tags.datadoghq.com/env: env
+    tags.datadoghq.com/service: service
+    tags.datadoghq.com/version: version
   env:
     - name: DD_ENV
       value: "lab"
+    - name: DD_CLUSTER_NAME
+      value: alexf-lab
   #     Required if kubelet readOnlyPort port is not available
   #   - name: DD_KUBELET_TLS_VERIFY
   #     value: false
@@ -37,8 +43,19 @@ datadog:
           ssl_ca_cert: /host/etc/kubernetes/pki/etcd/ca.crt
           ssl_cert: /host/etc/kubernetes/pki/etcd/peer.crt
           ssl_private_key: /host/etc/kubernetes/pki/etcd/peer.key
+    istio.yaml: |-
+      ad_identifiers:
+        - proxyv2
+      init_config:
+      instances:
+        - istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
+          send_monotonic_counter: true
+          send_histograms_buckets: true
 agents:
   enabled: true
+  image:
+    tag: 7.20.0-rc.9
+    doNotCheckTag: true
   rbac:
     create: true
   podAnnotations:
@@ -47,6 +64,8 @@ agents:
     - mountPath: /host/etc/kubernetes/pki/etcd
       name: etcd-certs
     - mountPath: /etc/datadog-agent/conf.d/etcd.d
+      name: empty-dir
+    - mountPath: /etc/datadog-agent/conf.d/istio.d
       name: empty-dir
   volumes:
     - name: etcd-certs
@@ -63,3 +82,14 @@ clusterAgent:
     create: true
   podAnnotations:
     sidecar.istio.io/inject: "false"
+  env:
+    - name: DD_ENV
+      value: "lab"
+    - name: DD_CLUSTER_NAME
+      value: alexf-lab
+  confd:
+    istio.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - istiod_endpoint: http://istio-pilot.istio-system:8080/metrics
