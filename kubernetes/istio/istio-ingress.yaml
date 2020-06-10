@@ -12,16 +12,16 @@ spec:
         number: 80
       hosts:
         - "*"
-    - port:
-        name: https
-        protocol: HTTPS
-        number: 443
-      tls:
-        mode: SIMPLE
-        serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-        privateKey: /etc/istio/ingressgateway-certs/tls.key
-      hosts:
-        - "*"
+    # - port:
+    #     name: https
+    #     protocol: HTTPS
+    #     number: 443
+    #   tls:
+    #     mode: SIMPLE
+    #     serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+    #     privateKey: /etc/istio/ingressgateway-certs/tls.key
+    #   hosts:
+    #     - "*"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
