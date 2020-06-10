@@ -46,7 +46,8 @@ spec:
   selector:
     app: app-java
   ports:
-    - port: 8000
+    - name: http
+      port: 8000
       targetPort: 8080
 ---
 apiVersion: networking.k8s.io/v1beta1

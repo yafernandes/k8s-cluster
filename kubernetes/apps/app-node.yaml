@@ -44,7 +44,8 @@ metadata:
   name: app-node
 spec:
   ports:
-    - port: 8000
+    - name: http
+      port: 8000
       targetPort: 8080
   selector:
     app: app-node
