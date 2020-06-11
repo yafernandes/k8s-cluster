@@ -25,6 +25,10 @@ datadog:
       value: "lab"
     - name: DD_CLUSTER_NAME
       value: alexf-lab
+    - name: DD_HOSTNAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
   #     Required if kubelet readOnlyPort port is not available
   #   - name: DD_KUBELET_TLS_VERIFY
   #     value: false
@@ -87,6 +91,10 @@ clusterAgent:
       value: "lab"
     - name: DD_CLUSTER_NAME
       value: alexf-lab
+    - name: DD_HOSTNAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
   confd:
     istio.yaml: |-
       cluster_check: true
