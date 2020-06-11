@@ -57,9 +57,6 @@ datadog:
           send_histograms_buckets: true
 agents:
   enabled: true
-  image:
-    tag: 7.20.0-rc.9
-    doNotCheckTag: true
   rbac:
     create: true
   podAnnotations:
