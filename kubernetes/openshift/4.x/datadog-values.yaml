@@ -17,10 +17,6 @@ datadog:
   dogstatsd:
     nonLocalTraffic: true
     useHostPort: true
-  podLabelsAsTags: 
-    tags.datadoghq.com/env: env
-    tags.datadoghq.com/service: service
-    tags.datadoghq.com/version: version
   env:
     - name: DD_ENV
       value: "lab"
@@ -32,35 +28,10 @@ datadog:
           fieldPath: spec.nodeName
     - name: DD_KUBELET_TLS_VERIFY
       value: "false"
-  confd:
-    etcd.yaml: |-
-      ad_identifiers:
-        - etcd
-      init_config:
-      instances:
-        - use_preview: true
-          prometheus_url: https://%%host%%:2379/metrics
-          ssl_ca_cert: /host/etc/kubernetes/pki/etcd/ca.crt
-          ssl_cert: /host/etc/kubernetes/pki/etcd/peer.crt
-          ssl_private_key: /host/etc/kubernetes/pki/etcd/peer.key
 agents:
   enabled: true
   rbac:
     create: true
-  volumeMounts:
-    - mountPath: /host/etc/kubernetes/pki/etcd
-      name: etcd-certs
-    - mountPath: /etc/datadog-agent/conf.d/etcd.d
-      name: empty-dir
-    - mountPath: /etc/datadog-agent/conf.d/istio.d
-      name: empty-dir
-  volumes:
-    - name: etcd-certs
-      hostPath:
-        path: /etc/kubernetes/pki/etcd
-        type: DirectoryOrCreate
-    - name: empty-dir
-      emptyDir: {}
   tolerations:
     - operator: Exists
 clusterAgent:
@@ -76,3 +47,12 @@ clusterAgent:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
+  confd:
+    etcd.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - use_preview: true
+          prometheus_url: https://metrics.openshift-etcd-operator/metrics
+          ssl_verify: false
+          bearer_token_auth: true
