@@ -1,5 +1,5 @@
 datadog:
-  apiKeyExistingSecret: dd
+  apiKeyExistingSecret: datadog-keys
   apm:
     enabled: true
   logs:

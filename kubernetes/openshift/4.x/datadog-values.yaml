@@ -1,5 +1,5 @@
 datadog:
-  apiKeyExistingSecret: dd
+  apiKeyExistingSecret: datadog-keys
   criSocketPath: /var/run/crio/crio.sock
   apm:
     enabled: true
