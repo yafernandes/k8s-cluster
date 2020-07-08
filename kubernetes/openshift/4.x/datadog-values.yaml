@@ -13,7 +13,7 @@ datadog:
     enabled: true
   clusterChecks:
     enabled: true
-  kubeStateMetricsEnabled: true
+  kubeStateMetricsEnabled: false
   dogstatsd:
     nonLocalTraffic: true
     useHostPort: true
@@ -83,5 +83,13 @@ clusterAgent:
       init_config:
       instances:
         - prometheus_url: http://dns-default.openshift-dns:9153/metrics
+          ssl_verify: false
+          bearer_token_auth: true
+    # TO BE VALIDATED
+    kubernetes_state.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://kube-state-metrics.openshift-monitoring:8443/metrics
           ssl_verify: false
           bearer_token_auth: true
