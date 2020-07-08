@@ -129,7 +129,7 @@
         var: kubeadm_init.stderr_lines
     - name: Install Calico
       become: yes
-      shell: kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml --kubeconfig=/etc/kubernetes/admin.conf
+      shell: kubectl apply -f https://docs.projectcalico.org/v3.15/manifests/calico.yaml --kubeconfig=/etc/kubernetes/admin.conf
     - name: Get Kubernets join cluster command
       become: yes
       shell: kubeadm token create --print-join-command
