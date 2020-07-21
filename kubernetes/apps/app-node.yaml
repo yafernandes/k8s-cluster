@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app-node
+  labels:
+    tags.datadoghq.com/service: NodeJS
+    tags.datadoghq.com/version: "0.1"
 spec:
   replicas: 3
   selector:
@@ -18,12 +21,6 @@ spec:
         image: yaalexf/app-node
         imagePullPolicy: Always
         env:
-          - name: DD_AGENT_HOST
-            valueFrom:
-              fieldRef:
-                fieldPath: status.hostIP
-          - name: DD_SERVICE_NAME
-            value: "NodeJS"
           - name: DD_LOGS_INJECTION
             value: "true"
           - name: DD_TRACE_ANALYTICS_ENABLED
