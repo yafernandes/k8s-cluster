@@ -1,5 +1,7 @@
 datadog:
   apiKeyExistingSecret: datadog-keys
+  orchestratorExplorer:
+    enabled: true
   apm:
     enabled: true
   logs:
@@ -79,6 +81,9 @@ agents:
     - operator: Exists
 clusterAgent:
   enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: true
   rbac:
     create: true
   podAnnotations:
