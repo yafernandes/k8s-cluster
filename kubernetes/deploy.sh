@@ -7,4 +7,4 @@ kubectl create secret generic datadog-keys --from-env-file=secrets.txt -n datado
 
 kubectl create secret generic datadog-keys --from-env-file=secrets.txt
 
-helm install datadog stable/datadog -f datadog-values.yaml -n datadog
+helm install datadog datadog/datadog -f datadog-values.yaml -n datadog
