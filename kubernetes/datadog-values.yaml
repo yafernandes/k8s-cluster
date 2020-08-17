@@ -23,8 +23,6 @@ datadog:
   env:
     - name: DD_ENV
       value: "lab"
-    - name: DD_CONTAINER_EXCLUDE_METRICS
-      value: "kube_namespace:datadog"
   confd:
     etcd.yaml: |-
       ad_identifiers:
