@@ -7,7 +7,6 @@ datadog:
     enabled: true
     containerCollectAll: true
   processAgent:
-    enabled: true
     processCollection: true
   systemProbe:
     enabled: true
@@ -29,9 +28,13 @@ datadog:
     - name: DD_KUBELET_TLS_VERIFY
       value: "false"
 agents:
-  enabled: true
+  # OpenShift 4.x - https://docs.datadoghq.com/integrations/openshift/#configuration
+  useHostNetwork: true
   rbac:
     create: true
+  podSecurity:
+    securityContextConstraints:
+      create: true
   tolerations:
     - operator: Exists
 clusterAgent:
