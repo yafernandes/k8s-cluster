@@ -4,6 +4,14 @@ datadog:
   collectEvents: true
   orchestratorExplorer:
     enabled: true
+  securityAgent:
+    compliance:
+      enabled: true
+      checkInterval: 5m
+    runtime:
+      enabled: true
+      syscallMonitor:
+        enabled: true
   apm:
     enabled: true
   logs:
@@ -12,9 +20,10 @@ datadog:
   processAgent:
     processCollection: true
   systemProbe:
-    enabled: true
     enableOOMKill: true
     collectDNSStats: true
+  networkMonitoring:
+    enabled: true
   clusterChecks:
     enabled: true
   dogstatsd:
@@ -35,8 +44,6 @@ datadog:
           ssl_cert: /host/etc/kubernetes/pki/etcd/peer.crt
           ssl_private_key: /host/etc/kubernetes/pki/etcd/peer.key
 agents:
-  rbac:
-    create: true
   volumeMounts:
     - mountPath: /host/etc/kubernetes/pki/etcd
       name: etcd-certs
@@ -56,8 +63,6 @@ clusterAgent:
   admissionController:
     enabled: true
     mutateUnlabelled: true
-  rbac:
-    create: true
   env:
     - name: DD_ENV
       value: "lab"
