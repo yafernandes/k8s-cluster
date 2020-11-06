@@ -1,0 +1,46 @@
+datadog:
+  clusterName: alexf-lab
+  apiKeyExistingSecret: datadog-keys
+  collectEvents: true
+  orchestratorExplorer:
+    enabled: true
+  securityAgent:
+    compliance:
+      enabled: true
+      checkInterval: 5m
+    runtime:
+      enabled: true
+      syscallMonitor:
+        enabled: true
+  apm:
+    enabled: true
+  logs:
+    enabled: true
+    containerCollectAll: true
+  processAgent:
+    processCollection: true
+  systemProbe:
+    enabled: true
+    enableOOMKill: true
+    collectDNSStats: true
+  networkMonitoring:
+    enabled: true
+  clusterChecks:
+    enabled: true
+  dogstatsd:
+    nonLocalTraffic: true
+    useHostPort: true
+  env:
+    - name: DD_ENV
+      value: "lab"
+agents:
+  tolerations:
+    - operator: Exists
+clusterAgent:
+  enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: true
+  env:
+    - name: DD_ENV
+      value: "lab"
