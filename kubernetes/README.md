@@ -1,54 +1,10 @@
 # Kubernetes
 
-## Technologie specific deltas
-
-### Istio
-
-```yaml
-datadog:
-  confd:
-    istio.yaml: |-
-      ad_identifiers:
-        - proxyv2
-      init_config:
-      instances:
-        - istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
-          send_histograms_buckets: true
-          send_monotonic_counter: true
-agents:
-  podAnnotations:
-    sidecar.istio.io/inject: "false"
-  volumeMounts:
-    - mountPath: /etc/datadog-agent/conf.d/istio.d
-      name: empty-dir
-  volumes:
-    - name: empty-dir
-      emptyDir: {}
-clusterAgent:
-  podAnnotations:
-    sidecar.istio.io/inject: "false"
-  confd:
-    istio.yaml: |-
-      cluster_check: true
-      init_config:
-      instances:
-        - istiod_endpoint: http://istio-pilot.istio-system:8080/metrics
-```
-
 ### Proxy
-```yaml
-datadog:
-  env:
-    - name: HTTP_PROXY
-      value: http://proxy.k8s.aws.pipsquack.ca:3128/
-    - name: HTTPS_PROXY
-      value: http://proxy.k8s.aws.pipsquack.ca:3128/
-```
 
-### Kubelet read only port not available
-```yaml
-datadog:
-  env:
-    - name: DD_KUBELET_TLS_VERIFY
-      value: false
-```
+The value in the `no_proxy` variable are:
+- k8s.aws.pipsquack.ca - Host domain
+- local - Kubernetes dns zone - `kubectl describe configmap coredns -n kube-system`
+- 10.0.0.0/16 - VPC address space
+- 172.16.0.0/12 - Kubernets service address space - `/etc/kubernetes/manifests/kube-controller-manager.yaml`
+- 192.168.0.0/16 - Kubernetes pods address space - `/etc/kubernetes/manifests/kube-controller-manager.yaml`
