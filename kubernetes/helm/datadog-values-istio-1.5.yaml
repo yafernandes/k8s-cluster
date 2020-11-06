@@ -1,13 +1,4 @@
 datadog:
-  confd:
-    istio.yaml: |-
-      ad_identifiers:
-        - proxyv2
-      init_config:
-      instances:
-        - istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
-          send_histograms_buckets: true
-          send_monotonic_counter: true
   clusterName: alexf-lab
   apiKeyExistingSecret: datadog-keys
   collectEvents: true
@@ -42,7 +33,18 @@ datadog:
   env:
     - name: DD_ENV
       value: "lab"
+  confd:
+    istio.yaml: |-
+      ad_identifiers:
+        - proxyv2
+      init_config:
+      instances:
+        - istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
+          send_histograms_buckets: true
+          send_monotonic_counter: true
 agents:
+  tolerations:
+    - operator: Exists
   podAnnotations:
     sidecar.istio.io/inject: "false"
   volumeMounts:
@@ -51,9 +53,14 @@ agents:
   volumes:
     - name: empty-dir
       emptyDir: {}
-  tolerations:
-    - operator: Exists
 clusterAgent:
+  enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: true
+  env:
+    - name: DD_ENV
+      value: "lab"
   podAnnotations:
     sidecar.istio.io/inject: "false"
   confd:
@@ -62,10 +69,3 @@ clusterAgent:
       init_config:
       instances:
         - istiod_endpoint: http://istio-pilot.istio-system:8080/metrics
-  enabled: true
-  admissionController:
-    enabled: true
-    mutateUnlabelled: true
-  env:
-    - name: DD_ENV
-      value: "lab"

@@ -1,9 +1,5 @@
 datadog:
   clusterName: alexf-eks
-  # Required by EKS / Amazon Linux 2 - https://github.com/DataDog/helm-charts/tree/master/charts/datadog#configuration-required-for-amazon-linux-2-based-nodes
-  podSecurity:
-    apparmor:
-      enabled: false
   apiKeyExistingSecret: datadog-keys
   collectEvents: true
   orchestratorExplorer:
@@ -37,7 +33,20 @@ datadog:
   env:
     - name: DD_ENV
       value: "lab"
+  podSecurity:
+    apparmor:
+      enabled: false
+agents:
+  tolerations:
+    - operator: Exists
 clusterAgent:
+  enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: true
+  env:
+    - name: DD_ENV
+      value: "lab"
   confd:
     kube_controller_manager.yaml: |-
       cluster_check: true
@@ -68,13 +77,3 @@ clusterAgent:
           use_preview: true
           ssl_ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
           bearer_token_auth: true
-  enabled: true
-  admissionController:
-    enabled: true
-    mutateUnlabelled: true
-  env:
-    - name: DD_ENV
-      value: "lab"
-agents:
-  tolerations:
-    - operator: Exists

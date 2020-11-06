@@ -1,13 +1,44 @@
 datadog:
+  clusterName: alexf-lab
+  apiKeyExistingSecret: datadog-keys
+  collectEvents: true
+  orchestratorExplorer:
+    enabled: true
+  securityAgent:
+    compliance:
+      enabled: true
+      checkInterval: 5m
+    runtime:
+      enabled: true
+      syscallMonitor:
+        enabled: true
+  apm:
+    enabled: true
+  logs:
+    enabled: true
+    containerCollectAll: true
+  processAgent:
+    processCollection: true
+  systemProbe:
+    enabled: true
+    enableOOMKill: true
+    collectDNSStats: true
+  networkMonitoring:
+    enabled: true
+  clusterChecks:
+    enabled: true
+  dogstatsd:
+    nonLocalTraffic: true
+    useHostPort: true
   env:
+    - name: DD_ENV
+      value: "lab"
     - name: http_proxy
       value: http://proxy.k8s.aws.pipsquack.ca:3128/
     - name: https_proxy
       value: http://proxy.k8s.aws.pipsquack.ca:3128/
     - name: no_proxy
       value: "k8s.aws.pipsquack.ca,cluster.local,10.0.0.0/16,172.16.0.0/12,192.168.0.0/16"
-    - name: DD_ENV
-      value: "lab"
   confd:
     etcd.yaml: |-
       ad_identifiers:
@@ -53,38 +84,9 @@ datadog:
         skip_proxy: true
       instances:
         - prometheus_url: http://%%host%%:10251/metrics
-  clusterName: alexf-lab
-  apiKeyExistingSecret: datadog-keys
-  collectEvents: true
-  orchestratorExplorer:
-    enabled: true
-  securityAgent:
-    compliance:
-      enabled: true
-      checkInterval: 5m
-    runtime:
-      enabled: true
-      syscallMonitor:
-        enabled: true
-  apm:
-    enabled: true
-  logs:
-    enabled: true
-    containerCollectAll: true
-  processAgent:
-    processCollection: true
-  systemProbe:
-    enabled: true
-    enableOOMKill: true
-    collectDNSStats: true
-  networkMonitoring:
-    enabled: true
-  clusterChecks:
-    enabled: true
-  dogstatsd:
-    nonLocalTraffic: true
-    useHostPort: true
 agents:
+  tolerations:
+    - operator: Exists
   volumeMounts:
     - mountPath: /host/etc/kubernetes/pki/etcd
       name: etcd-certs
@@ -105,8 +107,6 @@ agents:
         type: DirectoryOrCreate
     - name: empty-dir
       emptyDir: {}
-  tolerations:
-    - operator: Exists
 clusterAgent:
   enabled: true
   admissionController:

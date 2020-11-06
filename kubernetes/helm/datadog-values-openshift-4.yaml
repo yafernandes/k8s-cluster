@@ -1,12 +1,5 @@
 datadog:
   clusterName: alexf-openshift4
-  criSocketPath: /var/run/crio/crio.sock
-  kubeStateMetricsEnabled: false
-  env:
-    - name: DD_KUBELET_TLS_VERIFY
-      value: "false"
-    - name: DD_ENV
-      value: "lab"
   apiKeyExistingSecret: datadog-keys
   collectEvents: true
   orchestratorExplorer:
@@ -37,15 +30,28 @@ datadog:
   dogstatsd:
     nonLocalTraffic: true
     useHostPort: true
+  env:
+    - name: DD_ENV
+      value: "lab"
+    - name: DD_KUBELET_TLS_VERIFY
+      value: "false"
+  criSocketPath: /var/run/crio/crio.sock
+  kubeStateMetricsEnabled: false
 agents:
+  tolerations:
+    - operator: Exists
   podSecurity:
     securityContextConstraints:
       create: true
-  # OpenShift 4.x - https://docs.datadoghq.com/integrations/openshift/#configuration
   useHostNetwork: true
-  tolerations:
-    - operator: Exists
 clusterAgent:
+  enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: true
+  env:
+    - name: DD_ENV
+      value: "lab"
   confd:
     etcd.yaml: |-
       cluster_check: true
@@ -91,10 +97,3 @@ clusterAgent:
         - kube_state_url: https://kube-state-metrics.openshift-monitoring:8443/metrics
           ssl_verify: false
           bearer_token_auth: true
-  enabled: true
-  admissionController:
-    enabled: true
-    mutateUnlabelled: true
-  env:
-    - name: DD_ENV
-      value: "lab"
