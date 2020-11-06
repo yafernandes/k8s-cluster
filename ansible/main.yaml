@@ -129,7 +129,7 @@
         var: kubeadm_init.stderr_lines
     - name: Install Calico
       become: yes
-      shell: kubectl apply -f https://docs.projectcalico.org/v3.15/manifests/calico.yaml --kubeconfig=/etc/kubernetes/admin.conf
+      shell: kubectl apply -f https://docs.projectcalico.org/v3.16/manifests/calico.yaml --kubeconfig=/etc/kubernetes/admin.conf
     - name: Get Kubernets join cluster command
       become: yes
       shell: kubeadm token create --print-join-command
@@ -162,6 +162,23 @@
         name: kubelet
         state: restarted
 
+- name: Allow core services to listen on HTTP
+  hosts:
+    - masters
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Controller manager
+      lineinfile:
+        path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+        regexp: "--port=0$"
+        state: absent
+    - name: Scheduler
+      lineinfile:
+        path: /etc/kubernetes/manifests/kube-scheduler.yaml
+        regexp: "--port=0$"
+        state: absent
+
 - name: Set Kubernets kubeconfig on master
   hosts: master
   gather_facts: no
@@ -170,21 +187,13 @@
       shell: kubeadm alpha kubeconfig user --client-name=alex --org=system:masters
       become: yes
       register: kubeconfig
-    - name: Creates server .kube directory
-      file:
-        path: /home/ubuntu/.kube
-        state: directory
-    - name: Create kubeconfig file
-      copy:
-        content: "{{ kubeconfig.stdout }}"
-        dest: /home/ubuntu/.kube/config
     - name: Copy kubeconfig to local machine
       copy:
         content: "{{ kubeconfig.stdout }}"
-        dest: /Users/alex.fernandes/.kube/config
+        dest: /Users/alex.fernandes/.kube/vanilla.config
       delegate_to: localhost
     - name: Updates the server url to use the public DNS host name
-      shell: kubectl config set clusters.kubernetes.server https://master.{{domain}}:6443
+      shell: kubectl config set clusters.kubernetes.server https://master.{{domain}}:6443 --kubeconfig=/Users/alex.fernandes/.kube/vanilla.config
       delegate_to: localhost
 
 - name: Installs and configure Squid
@@ -218,15 +227,15 @@
     - name: Set http_proxy
       lineinfile:
         path: /etc/environment
-        regexp: '^HTTP_PROXY='
-        line: HTTP_PROXY=http://proxy.{{domain}}:3128/
+        regexp: '^http_proxy='
+        line: http_proxy=http://proxy.{{domain}}:3128/
     - name: Set https_proxy
       lineinfile:
         path: /etc/environment
-        regexp: '^HTTPS_PROXY='
-        line: HTTPS_PROXY=http://proxy.{{domain}}:3128/
+        regexp: '^https_proxy='
+        line: https_proxy=http://proxy.{{domain}}:3128/
     - name: Set no_proxy
       lineinfile:
         path: /etc/environment
-        regexp: '^NO_PROXY='
-        line: NO_PROXY=.{{domain}}
+        regexp: '^no_proxy='
+        line: no_proxy={{domain}},cluster.local,10.0.0.0/16,172.16.0.0/12,192.168.0.0/16
