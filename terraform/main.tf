@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.3.0"
+    }
+  }
+}
+
 provider "aws" {
   region                  = var.region
   shared_credentials_file = "/Users/alex.fernandes/.aws/credentials"
@@ -21,8 +30,8 @@ resource "aws_instance" "master" {
   }
 
   tags = {
-    Name    = "${var.cluster_name} Master"
-    Creator = "alex.fernandes"
+    Name     = "${var.cluster_name} Master"
+    Creator  = "alex.fernandes"
     dns_name = "master"
   }
 
@@ -45,8 +54,8 @@ resource "aws_instance" "worker" {
   }
 
   tags = {
-    Name    = "${var.cluster_name} Worker ${format("%02v", count.index)}"
-    Creator = "alex.fernandes"
+    Name     = "${var.cluster_name} Worker ${format("%02v", count.index)}"
+    Creator  = "alex.fernandes"
     dns_name = "worker${format("%02v", count.index)}"
   }
 
@@ -68,8 +77,8 @@ resource "aws_instance" "proxy" {
   }
 
   tags = {
-    Name    = "${var.cluster_name} proxy"
-    Creator = "alex.fernandes"
+    Name     = "${var.cluster_name} proxy"
+    Creator  = "alex.fernandes"
     dns_name = "proxy"
   }
 

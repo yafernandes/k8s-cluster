@@ -6,13 +6,13 @@ data "http" "dd_ip_ranges" {
   url = "https://ip-ranges.datadoghq.com/"
 }
 
-data "dns_a_record_set" "proxy" {
-  host = "proxy.azure.pipsquack.ca"
-}
+# data "dns_a_record_set" "proxy" {
+#   host = "proxy.azure.pipsquack.ca"
+# }
 
 data "aws_availability_zones" "available" {
   state                = "available"
-  blacklisted_zone_ids = ["us-west-2d"]
+  exclude_zone_ids = ["us-west-2d"]
 }
 
 resource "aws_vpc" "main" {
@@ -59,12 +59,12 @@ resource "aws_security_group" "main" {
   }
 
   // Kubernetes default Nodeport range
-  ingress {
-    from_port   = 30000
-    to_port     = 32767
-    protocol    = "tcp"
-    cidr_blocks = ["${data.dns_a_record_set.proxy.addrs[0]}/32"]
-  }
+  # ingress {
+  #   from_port   = 30000
+  #   to_port     = 32767
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["${data.dns_a_record_set.proxy.addrs[0]}/32"]
+  # }
 
   egress {
     from_port   = 0
@@ -85,6 +85,14 @@ resource "aws_security_group" "main" {
     from_port   = 53
     to_port     = 53
     protocol    = "17"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  //  Opening BGP port for Calico
+  egress {
+    from_port   = 179
+    to_port     = 179
+    protocol    = "6"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
