@@ -1,0 +1,69 @@
+datadog:
+  confd:
+    etcd.yaml: |-
+      ad_identifiers:
+        - etcd
+      init_config:
+      instances:
+        - use_preview: true
+          prometheus_url: https://%%host%%:2379/metrics
+          ssl_ca_cert: /host/etc/kubernetes/pki/etcd/ca.crt
+          ssl_cert: /host/etc/kubernetes/pki/etcd/peer.crt
+          ssl_private_key: /host/etc/kubernetes/pki/etcd/peer.key
+  clusterName: alexf-lab
+  apiKeyExistingSecret: datadog-keys
+  collectEvents: true
+  orchestratorExplorer:
+    enabled: true
+  securityAgent:
+    compliance:
+      enabled: true
+      checkInterval: 5m
+    runtime:
+      enabled: true
+      syscallMonitor:
+        enabled: true
+  apm:
+    enabled: true
+  logs:
+    enabled: true
+    containerCollectAll: true
+  processAgent:
+    processCollection: true
+  systemProbe:
+    enabled: true
+    enableOOMKill: true
+    collectDNSStats: true
+  networkMonitoring:
+    enabled: true
+  clusterChecks:
+    enabled: true
+  dogstatsd:
+    nonLocalTraffic: true
+    useHostPort: true
+  env:
+    - name: DD_ENV
+      value: "lab"
+agents:
+  volumeMounts:
+    - mountPath: /host/etc/kubernetes/pki/etcd
+      name: etcd-certs
+    - mountPath: /etc/datadog-agent/conf.d/etcd.d
+      name: empty-dir
+  volumes:
+    - name: etcd-certs
+      hostPath:
+        path: /etc/kubernetes/pki/etcd
+        type: DirectoryOrCreate
+    - name: empty-dir
+      emptyDir: {}
+  tolerations:
+    - operator: Exists
+clusterAgent:
+  enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: true
+  env:
+    - name: DD_ENV
+      value: "lab"

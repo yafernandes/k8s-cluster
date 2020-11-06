@@ -1,0 +1,74 @@
+datadog:
+  env:
+    - name: http_proxy
+      value: http://proxy.k8s.aws.pipsquack.ca:3128/
+    - name: https_proxy
+      value: http://proxy.k8s.aws.pipsquack.ca:3128/
+    - name: no_proxy
+      value: "k8s.aws.pipsquack.ca,cluster.local,10.0.0.0/16,172.16.0.0/12,192.168.0.0/16"
+  confd:
+    etcd.yaml: |-
+      ad_identifiers:
+        - etcd
+      init_config:
+        skip_proxy: true
+      instances:
+        - use_preview: true
+          prometheus_url: https://%%host%%:2379/metrics
+          ssl_ca_cert: /host/etc/kubernetes/pki/etcd/ca.crt
+          ssl_cert: /host/etc/kubernetes/pki/etcd/peer.crt
+          ssl_private_key: /host/etc/kubernetes/pki/etcd/peer.key
+    coredns.yaml: |-
+      ad_identifiers:
+        - coredns
+      init_config:
+        skip_proxy: true
+      instances:
+        - prometheus_url: "http://%%host%%:9153/metrics"
+          tags:
+            - "dns-pod:%%host%%"
+    kube_apiserver_metrics.yaml: |-
+      ad_identifiers:
+        - kube-apiserver
+      init_config:
+        skip_proxy: true
+      instances:
+        - prometheus_url: https://%%host%%:6443/metrics
+          tags:
+            - apiserver:%%host%%
+    kube_controller_manager.yaml: |-
+      ad_identifiers:
+        - kube-controller-manager
+      init_config:
+        skip_proxy: true
+      instances:
+        - prometheus_url: "http://%%host%%:10252/metrics"
+          bearer_token_auth: true
+    kube_scheduler.yaml: |-
+      ad_identifiers:
+        - kube-scheduler
+      init_config:
+        skip_proxy: true
+      instances:
+        - prometheus_url: http://%%host%%:10251/metrics
+agents:
+  volumeMounts:
+    - mountPath: /host/etc/kubernetes/pki/etcd
+      name: etcd-certs
+    - mountPath: /etc/datadog-agent/conf.d/etcd.d
+      name: empty-dir
+    - mountPath: /etc/datadog-agent/conf.d/coredns.d
+      name: empty-dir
+    - mountPath: /etc/datadog-agent/conf.d/kube_apiserver_metrics.d
+      name: empty-dir
+    - mountPath: /etc/datadog-agent/conf.d/kube_controller_manager.d
+      name: empty-dir
+    - mountPath: /etc/datadog-agent/conf.d/kube_scheduler.d
+      name: empty-dir
+  volumes:
+    - name: etcd-certs
+      hostPath:
+        path: /etc/kubernetes/pki/etcd
+        type: DirectoryOrCreate
+    - name: empty-dir
+      emptyDir: {}

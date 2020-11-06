@@ -1,0 +1,25 @@
+datadog:
+  confd:
+    etcd.yaml: |-
+      ad_identifiers:
+        - etcd
+      init_config:
+      instances:
+        - use_preview: true
+          prometheus_url: https://%%host%%:2379/metrics
+          ssl_ca_cert: /host/etc/kubernetes/pki/etcd/ca.crt
+          ssl_cert: /host/etc/kubernetes/pki/etcd/peer.crt
+          ssl_private_key: /host/etc/kubernetes/pki/etcd/peer.key
+agents:
+  volumeMounts:
+    - mountPath: /host/etc/kubernetes/pki/etcd
+      name: etcd-certs
+    - mountPath: /etc/datadog-agent/conf.d/etcd.d
+      name: empty-dir
+  volumes:
+    - name: etcd-certs
+      hostPath:
+        path: /etc/kubernetes/pki/etcd
+        type: DirectoryOrCreate
+    - name: empty-dir
+      emptyDir: {}
