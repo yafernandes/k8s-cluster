@@ -24,6 +24,7 @@ datadog:
   processAgent:
     processCollection: true
   systemProbe:
+    enabled: true
     enableOOMKill: true
     collectDNSStats: true
   networkMonitoring:
