@@ -1,0 +1,99 @@
+datadog:
+  clusterName: alexf-openshift4
+  criSocketPath: /var/run/crio/crio.sock
+  kubeStateMetricsEnabled: false
+  env:
+    - name: DD_KUBELET_TLS_VERIFY
+      value: "false"
+    - name: DD_ENV
+      value: "lab"
+  apiKeyExistingSecret: datadog-keys
+  collectEvents: true
+  orchestratorExplorer:
+    enabled: true
+  securityAgent:
+    compliance:
+      enabled: true
+      checkInterval: 5m
+    runtime:
+      enabled: true
+      syscallMonitor:
+        enabled: true
+  apm:
+    enabled: true
+  logs:
+    enabled: true
+    containerCollectAll: true
+  processAgent:
+    processCollection: true
+  systemProbe:
+    enableOOMKill: true
+    collectDNSStats: true
+  networkMonitoring:
+    enabled: true
+  clusterChecks:
+    enabled: true
+  dogstatsd:
+    nonLocalTraffic: true
+    useHostPort: true
+agents:
+  podSecurity:
+    securityContextConstraints:
+      create: true
+  # OpenShift 4.x - https://docs.datadoghq.com/integrations/openshift/#configuration
+  useHostNetwork: true
+  tolerations:
+    - operator: Exists
+clusterAgent:
+  confd:
+    etcd.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - use_preview: true
+          prometheus_url: https://metrics.openshift-etcd-operator/metrics
+          ssl_verify: false
+          bearer_token_auth: true
+    kube_controller_manager.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://kube-controller-manager.openshift-kube-controller-manager/metrics
+          ssl_verify: false
+          bearer_token_auth: true
+          leader_election: false
+    kube_scheduler.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://scheduler.openshift-kube-scheduler/metrics
+          ssl_verify: false
+          bearer_token_auth: true
+    kube_apiserver_metrics.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://apiserver.openshift-kube-apiserver/metrics
+          ssl_verify: false
+          bearer_token_auth: true
+    coredns.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://dns-default.openshift-dns:9154/metrics
+          ssl_verify: false
+          bearer_token_auth: true
+    kubernetes_state.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - kube_state_url: https://kube-state-metrics.openshift-monitoring:8443/metrics
+          ssl_verify: false
+          bearer_token_auth: true
+  enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: true
+  env:
+    - name: DD_ENV
+      value: "lab"

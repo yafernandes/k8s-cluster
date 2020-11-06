@@ -1,0 +1,69 @@
+datadog:
+  clusterName: alexf-aks
+  env:
+    - name: DD_KUBELET_TLS_VERIFY
+      value: "false"
+    - name: DD_ENV
+      value: "lab"
+  apiKeyExistingSecret: datadog-keys
+  collectEvents: true
+  orchestratorExplorer:
+    enabled: true
+  securityAgent:
+    compliance:
+      enabled: true
+      checkInterval: 5m
+    runtime:
+      enabled: true
+      syscallMonitor:
+        enabled: true
+  apm:
+    enabled: true
+  logs:
+    enabled: true
+    containerCollectAll: true
+  processAgent:
+    processCollection: true
+  systemProbe:
+    enableOOMKill: true
+    collectDNSStats: true
+  networkMonitoring:
+    enabled: true
+  clusterChecks:
+    enabled: true
+  dogstatsd:
+    nonLocalTraffic: true
+    useHostPort: true
+clusterAgent:
+  confd:
+    kube_controller_manager.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://kubernetes.default/metrics
+          ssl_ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_auth: true
+    kube_scheduler.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://kubernetes.default/metrics
+          ssl_ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_auth: true
+    kube_apiserver_metrics.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://kubernetes.default/metrics
+          ssl_ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_auth: true
+  enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: true
+  env:
+    - name: DD_ENV
+      value: "lab"
+agents:
+  tolerations:
+    - operator: Exists
