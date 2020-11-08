@@ -1,0 +1,7 @@
+clusterAgent:
+  confd:
+    coredns.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: http://dns-default.openshift-dns:9153/metrics
