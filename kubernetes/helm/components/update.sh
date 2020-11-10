@@ -1,4 +1,4 @@
-yq m -xa append base.yaml etcd.yaml > ../datadog-values.yaml
+yq m -xa append base.yaml etcd.yaml > ../datadog-values-vanilla.yaml
 yq m -xa append base.yaml openshift-4.yaml > ../datadog-values-openshift-4.yaml
 yq m -xa append base.yaml proxy.yaml > ../datadog-values-proxy.yaml
 yq m -xa append base.yaml eks.yaml > ../datadog-values-eks.yaml
