@@ -1,0 +1,14 @@
+agents:
+  containers:
+    agent:
+      env:
+        - name: DD_KUBELET_CLIENT_CA
+          value: "/host/etc/kubernetes/certs/kubeletserver.crt"
+  volumeMounts:
+    - mountPath: /host/etc/kubernetes/certs
+      name: kubernetes-certs
+  volumes:
+    - name: kubernetes-certs
+      hostPath:
+        path: /etc/kubernetes/certs
+        type: DirectoryOrCreate

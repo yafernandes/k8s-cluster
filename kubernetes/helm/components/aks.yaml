@@ -1,8 +1,5 @@
 datadog:
   clusterName: alexf-aks
-  env:
-    - name: DD_KUBELET_TLS_VERIFY
-      value: "false"
 clusterAgent:
   confd:
     kube_controller_manager.yaml: |-
