@@ -29,7 +29,7 @@ kubectl create secret generic datadog-keys --from-env-file=secrets.txt
 helm install datadog datadog/datadog -n datadog -f <values file>
 ```
 
-I highly recommend exploring the [new curated views for Kubernetes](https://www.datadoghq.com/blog/explore-kubernetes-resources-with-datadog/). The values file provided also enable the new [Admission Controller](https://docs.datadoghq.com/agent/cluster_agent/admission_controller), simplifing the user’s application pod configuration.
+I highly recommend exploring the [new curated views for Kubernetes](https://www.datadoghq.com/blog/explore-kubernetes-resources-with-datadog/). The values file provided also enables the new [Admission Controller](https://docs.datadoghq.com/agent/cluster_agent/admission_controller), simplifing the user’s application pod configuration.
 
 ## Installing Datadog Helm Charts
 
