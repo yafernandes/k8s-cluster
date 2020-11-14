@@ -33,14 +33,11 @@ datadog:
   env:
     - name: DD_ENV
       value: "lab"
+    - name: DD_KUBELET_CLIENT_CA
+      value: "/host/etc/kubernetes/certs/kubeletserver.crt"
 agents:
   tolerations:
     - operator: Exists
-  containers:
-    agent:
-      env:
-        - name: DD_KUBELET_CLIENT_CA
-          value: "/host/etc/kubernetes/certs/kubeletserver.crt"
   volumeMounts:
     - mountPath: /host/etc/kubernetes/certs
       name: kubernetes-certs
