@@ -1,0 +1,7 @@
+datadog:
+  criSocketPath: /var/run/containerd/containerd.sock
+  env:
+    - name: DD_KUBERNETES_KUBELET_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
