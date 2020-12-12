@@ -1,63 +1,30 @@
-# https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-helm/
 controller:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname=
-            operator: In
-            values:
-            - worker00.k8s.aws.pipsquack.ca
-  nginxStatus:
-    allowCidrs: 0.0.0.0
+  name: nginx-ingress
+  kind: DaemonSet
   service:
-    type: NodePort
-    httpPort:
-      nodePort: 30080
-    httpsPort:
-      nodePort: 30443
+    loadBalancerIP: "20.72.177.220"
   metrics:
     enabled: true
+    service:
+      annotations:
+        ad.datadoghq.com/service.check_names: '["nginx_ingress_controller"]'
+        ad.datadoghq.com/service.init_configs: '[{}]'
+        ad.datadoghq.com/service.instances: >-
+          [
+            {
+              "prometheus_url": "http://%%host%%:9913/metrics"
+            }
+          ]
+  podAnnotations:
+    ad.datadoghq.com/controller.check_names: '["nginx"]'
+    ad.datadoghq.com/controller.init_configs: '[{}]'
+    ad.datadoghq.com/controller.instances: >-
+      [
+        {
+          "nginx_status_url": "http://%%host%%/nginx_status/"
+        }
+      ]
   config:
-    entries:
-      enable-opentracing: "true"
-      datadog-collector-host: $HOST_IP
-      http-snippet: |
-        server {
-          listen 18080;
-          location /nginx_status {
-            allow all;
-            stub_status on;
-          }
-          location / {
-            return 404;
-          }
-        }
-      server-snippet: |
-        listen 18080;
-        location /nginx_status {
-          allow all;
-          stub_status on;
-        }
-        location / {
-          return 404;
-        }
-  extraEnvs:
-    - name: HOST_IP
-      valueFrom:
-        fieldRef:
-          fieldPath: status.hostIP
-  pod:
-    annotations:
-      ad.datadoghq.com/nginx-ingress-nginx-ingress.check_names: '["nginx_ingress_controller", "nginx"]'
-      ad.datadoghq.com/nginx-ingress-nginx-ingress.init_configs: '[{}, {}]'
-      ad.datadoghq.com/nginx-ingress-nginx-ingress.instances: >-
-        [
-          {
-            "prometheus_url": "http://%%host%%:9113/metrics"
-          },
-          {
-            "nginx_status_url": "http://%%host%%:18080/nginx_status"
-          }
-        ]
+    enable-opentracing: "true"
+    datadog-collector-host: $DD_AGENT_HOST
+    nginx-status-ipv4-whitelist: "10.0.0.0/8"
