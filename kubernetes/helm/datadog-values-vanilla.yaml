@@ -20,8 +20,8 @@ datadog:
   processAgent:
     processCollection: true
   systemProbe:
-    enabled: true
     enableOOMKill: true
+    enableTCPQueueLength: true
     collectDNSStats: true
   networkMonitoring:
     enabled: true
