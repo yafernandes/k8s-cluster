@@ -1,0 +1,2 @@
+datadog:
+  criSocketPath: /var/run/containerd/containerd.sock
