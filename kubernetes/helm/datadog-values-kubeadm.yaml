@@ -44,6 +44,7 @@ datadog:
           ssl_ca_cert: /host/etc/kubernetes/pki/etcd/ca.crt
           ssl_cert: /host/etc/kubernetes/pki/etcd/peer.crt
           ssl_private_key: /host/etc/kubernetes/pki/etcd/peer.key
+  criSocketPath: /var/run/containerd/containerd.sock
 agents:
   tolerations:
     - operator: Exists
@@ -51,13 +52,13 @@ agents:
     - mountPath: /host/etc/kubernetes/pki/etcd
       name: etcd-certs
     - mountPath: /etc/datadog-agent/conf.d/etcd.d
-      name: empty-dir
+      name: etcd-empty-dir
   volumes:
     - name: etcd-certs
       hostPath:
         path: /etc/kubernetes/pki/etcd
         type: DirectoryOrCreate
-    - name: empty-dir
+    - name: etcd-empty-dir
       emptyDir: {}
 clusterAgent:
   enabled: true
@@ -67,3 +68,11 @@ clusterAgent:
   env:
     - name: DD_ENV
       value: "lab"
+  confd:
+    kube_apiserver_metrics.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: https://kubernetes.default/metrics
+          ssl_ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_auth: true
