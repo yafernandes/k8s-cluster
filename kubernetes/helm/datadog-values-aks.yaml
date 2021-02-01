@@ -1,9 +1,6 @@
 datadog:
-  clusterName: alexf-aks
+  clusterName: alexf-lab
   apiKeyExistingSecret: datadog-keys
-  collectEvents: true
-  orchestratorExplorer:
-    enabled: true
   securityAgent:
     compliance:
       enabled: true
@@ -25,29 +22,20 @@ datadog:
     collectDNSStats: true
   networkMonitoring:
     enabled: true
-  clusterChecks:
-    enabled: true
   dogstatsd:
-    nonLocalTraffic: true
     useHostPort: true
   env:
     - name: DD_ENV
       value: "lab"
-    - name: DD_KUBELET_CLIENT_CA
-      value: "/host/etc/kubernetes/certs/kubeletserver.crt"
+    - name: DD_KUBERNETES_KUBELET_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+  criSocketPath: /var/run/containerd/containerd.sock
 agents:
   tolerations:
     - operator: Exists
-  volumeMounts:
-    - mountPath: /host/etc/kubernetes/certs
-      name: kubernetes-certs
-  volumes:
-    - name: kubernetes-certs
-      hostPath:
-        path: /etc/kubernetes/certs
-        type: DirectoryOrCreate
 clusterAgent:
-  enabled: true
   admissionController:
     enabled: true
     mutateUnlabelled: true

@@ -1,9 +1,6 @@
 datadog:
   clusterName: alexf-lab
   apiKeyExistingSecret: datadog-keys
-  collectEvents: true
-  orchestratorExplorer:
-    enabled: true
   securityAgent:
     compliance:
       enabled: true
@@ -25,14 +22,13 @@ datadog:
     collectDNSStats: true
   networkMonitoring:
     enabled: true
-  clusterChecks:
-    enabled: true
   dogstatsd:
-    nonLocalTraffic: true
     useHostPort: true
   env:
     - name: DD_ENV
       value: "lab"
+    - name: DD_IGNORE_AUTOCONF
+      value: "etcd"
   confd:
     etcd.yaml: |-
       ad_identifiers:
@@ -51,17 +47,12 @@ agents:
   volumeMounts:
     - mountPath: /host/etc/kubernetes/pki/etcd
       name: etcd-certs
-    - mountPath: /etc/datadog-agent/conf.d/etcd.d
-      name: etcd-empty-dir
   volumes:
     - name: etcd-certs
       hostPath:
         path: /etc/kubernetes/pki/etcd
         type: DirectoryOrCreate
-    - name: etcd-empty-dir
-      emptyDir: {}
 clusterAgent:
-  enabled: true
   admissionController:
     enabled: true
     mutateUnlabelled: true

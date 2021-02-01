@@ -1,9 +1,6 @@
 datadog:
   clusterName: alexf-eks
   apiKeyExistingSecret: datadog-keys
-  collectEvents: true
-  orchestratorExplorer:
-    enabled: true
   securityAgent:
     compliance:
       enabled: true
@@ -25,10 +22,7 @@ datadog:
     collectDNSStats: true
   networkMonitoring:
     enabled: true
-  clusterChecks:
-    enabled: true
   dogstatsd:
-    nonLocalTraffic: true
     useHostPort: true
   env:
     - name: DD_ENV
@@ -40,7 +34,6 @@ agents:
   tolerations:
     - operator: Exists
 clusterAgent:
-  enabled: true
   admissionController:
     enabled: true
     mutateUnlabelled: true
