@@ -2,7 +2,11 @@ controller:
   name: nginx-ingress
   kind: DaemonSet
   service:
-    loadBalancerIP: "20.72.177.220"
+    type: NodePort
+    nodePorts:
+      http: 30080
+      https: 30443
+    # loadBalancerIP: "20.72.177.220"
   metrics:
     enabled: true
     service:
@@ -15,6 +19,8 @@ controller:
               "prometheus_url": "http://%%host%%:9913/metrics"
             }
           ]
+  labels:
+    tags.datadoghq.com/env: lab
   podAnnotations:
     ad.datadoghq.com/controller.check_names: '["nginx"]'
     ad.datadoghq.com/controller.init_configs: '[{}]'
@@ -24,7 +30,11 @@ controller:
           "nginx_status_url": "http://%%host%%/nginx_status/"
         }
       ]
+  # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
   config:
     enable-opentracing: "true"
     datadog-collector-host: $DD_AGENT_HOST
-    nginx-status-ipv4-whitelist: "10.0.0.0/8"
+    datadog-environment: $DD_ENV
+    # Should match pod network
+    nginx-status-ipv4-whitelist: "192.168.0.0/16"
+    # nginx-status-ipv4-whitelist: "10.0.0.0/8"
