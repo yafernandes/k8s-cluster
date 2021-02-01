@@ -1,4 +1,7 @@
 datadog:
+  env:
+    - name: DD_IGNORE_AUTOCONF
+      value: "etcd"
   confd:
     etcd.yaml: |-
       ad_identifiers:
@@ -14,12 +17,8 @@ agents:
   volumeMounts:
     - mountPath: /host/etc/kubernetes/pki/etcd
       name: etcd-certs
-    - mountPath: /etc/datadog-agent/conf.d/etcd.d
-      name: etcd-empty-dir
   volumes:
     - name: etcd-certs
       hostPath:
         path: /etc/kubernetes/pki/etcd
         type: DirectoryOrCreate
-    - name: etcd-empty-dir
-      emptyDir: {}
