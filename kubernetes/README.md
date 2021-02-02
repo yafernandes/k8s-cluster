@@ -46,10 +46,15 @@ helm repo update
 
 [Documentation](https://github.com/DataDog/helm-charts/tree/master/charts/datadog)
 
-### Variations
+### Notes
 
-AKS clusters using Kubernetes version 1.19 node pools and greater use containerd as its container runtime. -- [here](https://docs.microsoft.com/en-us/azure/aks/cluster-configuration#container-runtime-configuration)
-If you are using an AKS cluster with containerd, you should incorporate this [delta](components/aks-v2.yaml).
+#### AKS
+
+AKS clusters using Kubernetes version 1.19 node pools and greater use *containerd* as its container runtime. -- [here](https://docs.microsoft.com/en-us/azure/aks/cluster-configuration#container-runtime-configuration)
+
+#### Kubernetes 1.20
+
+Getting error message `Warning: Cannot retrieve leader election record` for *kube-controller-manager* and *kube-scheduler*. Set `leader_election: false` for those integrations. 
 
 ## Proxy
 
