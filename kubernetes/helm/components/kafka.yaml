@@ -1,0 +1,28 @@
+datadog:
+  confd:
+    kafka: |-
+      ad_identifiers:
+        - kafka
+        - cp-kafka
+      init_config:
+          collect_default_metrics: true
+          is_jmx: true
+          new_gc_metrics: true
+          service: kafka
+      instances:
+      -   host: %%host%%
+          name: kafka
+          port: 9999
+    kafka_consumer: |-
+      ad_identifiers:
+        - kafka
+        - cp-kafka
+      init_config:
+      instances:
+      -   kafka_connect_str:
+          - %%host%%:9092
+          monitor_all_broker_highwatermarks: true
+          monitor_unlisted_consumer_groups: true
+agents:
+  image:
+    tag: latest-jmx
