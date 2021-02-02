@@ -53,6 +53,42 @@
         name: "{{ansible_user}}"
         group: docker
 
+# - name: Install containerd
+#   hosts:
+#     - masters
+#     - workers
+#   gather_facts: no
+#   become: yes
+#   tasks:
+#     - name: Creates containerd.conf
+#       copy:
+#         content: |
+#           overlay
+#           br_netfilter
+#         dest: /etc/modules-load.d/containerd.conf
+#     - shell: modprobe overlay
+#     - shell: modprobe br_netfilter
+#     - name: Creates 99-kubernetes-cri.conf
+#       copy:
+#         content: |
+#           net.bridge.bridge-nf-call-iptables  = 1
+#           net.ipv4.ip_forward                 = 1
+#           net.bridge.bridge-nf-call-ip6tables = 1
+#         dest: /etc/sysctl.d/99-kubernetes-cri.conf
+#     - shell: sysctl --system
+#     - name: Install required packages
+#       apt:
+#         name:
+#           - containerd
+#         update_cache: true
+#     - shell: mkdir -p /etc/containerd
+#     - shell: containerd config default > /etc/containerd/config.toml
+#     - name: Restart containerd
+#       systemd:
+#         name: containerd
+#         state: restarted
+#         daemon_reload: yes
+
 - name: Install Kubernetes binaries
   hosts:
     - masters
@@ -103,17 +139,17 @@
         state: restarted
         daemon_reload: yes
 
-- name: Calico requirements
-  hosts:
-    - masters
-    - workers
-  gather_facts: no
-  become: yes
-  tasks:
-    - name: Enable RPF strict mode - net.ipv4.conf.all.rp_filter=1
-      sysctl:
-        name: net.ipv4.conf.all.rp_filter
-        value: "1"
+# - name: Calico requirements
+#   hosts:
+#     - masters
+#     - workers
+#   gather_facts: no
+#   become: yes
+#   tasks:
+#     - name: Enable RPF strict mode - net.ipv4.conf.all.rp_filter=1
+#       sysctl:
+#         name: net.ipv4.conf.all.rp_filter
+#         value: "1"
 
 - name: Init master
   hosts: master
@@ -129,7 +165,7 @@
         var: kubeadm_init.stderr_lines
     - name: Install Calico
       become: yes
-      shell: kubectl apply -f https://docs.projectcalico.org/v3.16/manifests/calico.yaml --kubeconfig=/etc/kubernetes/admin.conf
+      shell: kubectl apply -f https://docs.projectcalico.org/v3.17/manifests/calico.yaml --kubeconfig=/etc/kubernetes/admin.conf
     - name: Get Kubernets join cluster command
       become: yes
       shell: kubeadm token create --print-join-command
@@ -183,15 +219,21 @@
   hosts: master
   gather_facts: no
   tasks:
-    - name: Generates the kubeconfig content
-      shell: kubeadm alpha kubeconfig user --client-name=alex --org=system:masters
+    # - name: Generates the kubeconfig content
+    #   shell: kubeadm alpha kubeconfig user --client-name=alex --org=system:masters
+    #   become: yes
+    #   register: kubeconfig
+    # - name: Copy kubeconfig to local machine
+    #   copy:
+    #     content: "{{ kubeconfig.stdout }}"
+    #     dest: /Users/alex.fernandes/.kube/vanilla.config
+    #   delegate_to: localhost
+    - name: Copy admin.conf to localhost
       become: yes
-      register: kubeconfig
-    - name: Copy kubeconfig to local machine
-      copy:
-        content: "{{ kubeconfig.stdout }}"
+      fetch:
+        src: /etc/kubernetes/admin.conf
         dest: /Users/alex.fernandes/.kube/vanilla.config
-      delegate_to: localhost
+        flat: yes
     - name: Updates the server url to use the public DNS host name
       shell: kubectl config set clusters.kubernetes.server https://master.{{domain}}:6443 --kubeconfig=/Users/alex.fernandes/.kube/vanilla.config
       delegate_to: localhost
@@ -239,3 +281,4 @@
         path: /etc/environment
         regexp: '^no_proxy='
         line: no_proxy={{domain}},cluster.local,10.0.0.0/16,172.16.0.0/12,192.168.0.0/16
+
