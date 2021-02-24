@@ -18,7 +18,7 @@ kubectl create ns datadog
 - Create the secret using the file created ealier.
 
 ```shell
-kubectl create secret generic datadog-keys --from-env-file=secrets.txt
+kubectl create secret generic datadog-keys -n datadog --from-env-file=secrets.txt
 ```
 
 - Download the [values file](helm) for your Kubernetes flavour. Update values like `datadog.clusterName` and `DD_ENV`. If creating a secret with a different name in the previous step, update `datadog.apiKeyExistingSecret`.
